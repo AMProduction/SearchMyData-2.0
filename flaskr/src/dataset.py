@@ -40,7 +40,7 @@ class Dataset:
                 logging.error(f'{self.__class__.__name__}: Connection error')
             else:
                 self.db = self.dbserver['searchmydata']
-                logging.warning('Connected')
+                logging.warning('Connected to DB')
         # if config.json does not exists
         else:
             logging.error(

@@ -9,6 +9,14 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.0/font/bootstrap-icons.css">
     <style>
         body { padding-bottom: 70px; }
+        #btn-back-to-top {
+            position: fixed;
+            border-radius: 50%;
+            bottom: 80px;
+            right: 20px;
+            z-index: 99;
+            display: none;
+            }
     </style>
 </head>
 <body>
@@ -25,189 +33,214 @@
     </div>
 </nav>
 
-<div class="container mt-3">
-    <table class="table table-striped table-secondary table-responsive table-sm caption-top">
-        <caption>Інформація про безвісно зниклих громадян</caption>
-        <thead>
-            <tr>
-                <th scope="col">LAST NAME</th>
-                <th scope="col">FIRST NAME</th>
-                <th scope="col">MIDDLE NAME</th>
-                <th scope="col">BIRTH DATE</th>
-                <th scope="col">LOST PLACE</th>
-                <th scope="col">LOST DATE</th>
-            </tr>
-        </thead>
-        {% if resultMissingPersons != 0 %}
-            <tbody>
-                {% for row in resultMissingPersons %}
-                <tr>
-                    <td>{{ row['LAST_NAME_U'] }}</td>
-                    <td>{{ row['FIRST_NAME_U'] }}</td>
-                    <td>{{ row['MIDDLE_NAME_U'] }}</td>
-                    <td>{{ '{:.10}'.format(row['BIRTH_DATE']) }}</td>
-                    <td>{{ row['LOST_PLACE'] }}</td>
-                    <td>{{ '{:.10}'.format(row['LOST_DATE']) }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        {% elif resultMissingPersons == 0 %}
-            <tfoot>
-                <tr>
-                    <td colspan="6" class="bi bi-exclamation-triangle-fill"> The missing persons register: No data found</td>                    
-                </tr>
-            </tfoot>
-        {% endif %}   
-    </table>
-</div>
+<!-- Back to top button -->
+<button type="button" class="btn btn-danger btn-floating btn-lg" id="btn-back-to-top">
+    <i class="bi bi-arrow-up-circle"></i>
+</button>
 
 <div class="container mt-3">
-    <table class="table table-striped table-secondary table-responsive table-sm caption-top">
-        <caption>Інформація про осіб, які переховуються від органів влади</caption>
-        <thead>
-            <tr>
-                <th scope="col">LAST NAME</th>
-                <th scope="col">FIRST NAME</th>
-                <th scope="col">MIDDLE NAME</th>
-                <th scope="col">BIRTH DATE</th>
-                <th scope="col">LOST PLACE</th>
-                <th scope="col">LOST DATE</th>
-                <th scope="col">CATEGORY</th>
-                <th scope="col">WHO IS SEARCHING</th>
-                <th scope="col">CRIME</th>
-            </tr>
-        </thead>
-        {% if resultWantedPersons != 0 %}
-            <tbody>
-                {% for row in resultWantedPersons %}
-                <tr>
-                    <td>{{ row['LAST_NAME_U'] }}</td>
-                    <td>{{ row['FIRST_NAME_U'] }}</td>
-                    <td>{{ row['MIDDLE_NAME_U'] }}</td>
-                    <td>{{ '{:.10}'.format(row['BIRTH_DATE']) }}</td>
-                    <td>{{ row['LOST_PLACE'] }}</td>
-                    <td>{{ '{:.10}'.format(row['LOST_DATE']) }}</td>
-                    <td>{{ row['CATEGORY'] }}</td>
-                    <td>{{ row['OVD'] }}</td>
-                    <td>{{ row['ARTICLE_CRIM'] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        {% elif resultWantedPersons == 0 %}
-            <tfoot>
-                <tr>
-                    <td colspan="9" class="bi bi-exclamation-triangle-fill"> The wanted persons register: No data found</td>                    
-                </tr>
-            </tfoot>
-        {% endif %}   
-    </table>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" id="RegistersTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="MissingPersons-tab" data-bs-toggle="tab" data-bs-target="#MissingPersons" type="button" role="tab" aria-controls="MissingPersons" aria-selected="true">Missing Persons Register</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="WantedPersons-tab" data-bs-toggle="tab" data-bs-target="#WantedPersons" type="button" role="tab" aria-controls="WantedPersons" aria-selected="false">Wanted Persons Register</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="Debtors-tab" data-bs-toggle="tab" data-bs-target="#Debtors" type="button" role="tab" aria-controls="Debtors" aria-selected="false">The debtors register</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="LegalEntities-tab" data-bs-toggle="tab" data-bs-target="#LegalEntities" type="button" role="tab" aria-controls="LegalEntities" aria-selected="false">The legal entities register</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="Entrepreneurs-tab" data-bs-toggle="tab" data-bs-target="#Entrepreneurs" type="button" role="tab" aria-controls="Entrepreneurs" aria-selected="false">The Entrepreneurs register</button>
+        </li>
+    </ul>
+  
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane active" id="MissingPersons" role="tabpanel" aria-labelledby="MissingPersons-tab">
+            <table class="table table-striped table-secondary table-responsive table-sm caption-top">
+                <caption>Інформація про безвісно зниклих громадян</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">LAST NAME</th>
+                        <th scope="col">FIRST NAME</th>
+                        <th scope="col">MIDDLE NAME</th>
+                        <th scope="col">BIRTH DATE</th>
+                        <th scope="col">LOST PLACE</th>
+                        <th scope="col">LOST DATE</th>
+                    </tr>
+                </thead>
+                {% if resultMissingPersons != 0 %}
+                    <tbody>
+                        {% for row in resultMissingPersons %}
+                        <tr>
+                            <td>{{ row['LAST_NAME_U'] }}</td>
+                            <td>{{ row['FIRST_NAME_U'] }}</td>
+                            <td>{{ row['MIDDLE_NAME_U'] }}</td>
+                            <td>{{ '{:.10}'.format(row['BIRTH_DATE']) }}</td>
+                            <td>{{ row['LOST_PLACE'] }}</td>
+                            <td>{{ '{:.10}'.format(row['LOST_DATE']) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                {% elif resultMissingPersons == 0 %}
+                    <tfoot>
+                        <tr>
+                            <td colspan="6" class="bi bi-exclamation-triangle-fill"> The missing persons register: No data found</td>                    
+                        </tr>
+                    </tfoot>
+                {% endif %}   
+            </table>
+        </div>
+        <div class="tab-pane" id="WantedPersons" role="tabpanel" aria-labelledby="WantedPersons-tab">
+            <table class="table table-striped table-secondary table-responsive table-sm caption-top">
+                <caption>Інформація про осіб, які переховуються від органів влади</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">LAST NAME</th>
+                        <th scope="col">FIRST NAME</th>
+                        <th scope="col">MIDDLE NAME</th>
+                        <th scope="col">BIRTH DATE</th>
+                        <th scope="col">LOST PLACE</th>
+                        <th scope="col">LOST DATE</th>
+                        <th scope="col">CATEGORY</th>
+                        <th scope="col">WHO IS SEARCHING</th>
+                        <th scope="col">CRIME</th>
+                    </tr>
+                </thead>
+                {% if resultWantedPersons != 0 %}
+                    <tbody>
+                        {% for row in resultWantedPersons %}
+                        <tr>
+                            <td>{{ row['LAST_NAME_U'] }}</td>
+                            <td>{{ row['FIRST_NAME_U'] }}</td>
+                            <td>{{ row['MIDDLE_NAME_U'] }}</td>
+                            <td>{{ '{:.10}'.format(row['BIRTH_DATE']) }}</td>
+                            <td>{{ row['LOST_PLACE'] }}</td>
+                            <td>{{ '{:.10}'.format(row['LOST_DATE']) }}</td>
+                            <td>{{ row['CATEGORY'] }}</td>
+                            <td>{{ row['OVD'] }}</td>
+                            <td>{{ row['ARTICLE_CRIM'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                {% elif resultWantedPersons == 0 %}
+                    <tfoot>
+                        <tr>
+                            <td colspan="9" class="bi bi-exclamation-triangle-fill"> The wanted persons register: No data found</td>                    
+                        </tr>
+                    </tfoot>
+                {% endif %}   
+            </table>
+        </div>
+        <div class="tab-pane" id="Debtors" role="tabpanel" aria-labelledby="Debtors-tab">
+            <table class="table table-striped table-secondary table-responsive table-sm caption-top">
+                <caption>Єдиний реєстр боржників</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">DEBTOR NAME</th>
+                        <th scope="col">DEBTOR CODE</th>
+                        <th scope="col">PUBLISHER</th>
+                        <th scope="col">EXECUTIVE SERVICE</th>
+                        <th scope="col">EXECUTIVE SERVICE EMPLOYEE</th>
+                        <th scope="col">CATEGORY</th>
+                    </tr>
+                </thead>
+                {% if resultDebtors != 0 %}
+                    <tbody>
+                        {% for row in resultDebtors %}
+                        <tr>
+                            <td>{{ row['DEBTOR_NAME'] }}</td>
+                            <td>{{ row['DEBTOR_CODE'] }}</td>
+                            <td>{{ row['PUBLISHER'] }}</td>
+                            <td>{{ row['EMP_ORG'] }}</td>
+                            <td>{{ row['EMP_FULL_FIO'] }}</td>
+                            <td>{{ row['VD_CAT'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                {% elif resultDebtors == 0 %}
+                    <tfoot>
+                        <tr>
+                            <td colspan="6" class="bi bi-exclamation-triangle-fill"> The debtors register: No data found</td>                    
+                        </tr>
+                    </tfoot>
+                {% endif %}   
+            </table>
+        </div>
+        <div class="tab-pane" id="LegalEntities" role="tabpanel" aria-labelledby="LegalEntities-tab">
+            <table class="table table-striped table-secondary table-responsive table-sm caption-top">
+                <caption>Єдиний державний реєстр юридичних осіб та громадських формувань</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">SHORT NAME</th>
+                        <th scope="col">EDRPOU</th>
+                        <th scope="col">ADDRESS</th>
+                        <th scope="col">KVED</th>
+                        <th scope="col">BOSS</th>
+                        <th scope="col">FOUNDERS</th>
+                        <th scope="col">STATE</th>
+                    </tr>
+                </thead>
+                {% if resultLegalEntities != 0 %}
+                    <tbody>
+                        {% for row in resultLegalEntities %}
+                        <tr>
+                            <td>{{ row['short_name'] }}</td>
+                            <td>{{ row['edrpou'] }}</td>
+                            <td>{{ row['address'] }}</td>
+                            <td>{{ row['kved'] }}</td>
+                            <td>{{ row['boss'] }}</td>
+                            <td>{{ row['founders'] }}</td>
+                            <td>{{ row['stan'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                {% elif resultLegalEntities == 0 %}
+                    <tfoot>
+                        <tr>
+                            <td colspan="7" class="bi bi-exclamation-triangle-fill"> The legal entities register: No data found</td>                    
+                        </tr>
+                    </tfoot>
+                {% endif %}   
+            </table>
+        </div>
+        <div class="tab-pane" id="Entrepreneurs" role="tabpanel" aria-labelledby="Entrepreneurs-tab">
+            <table class="table table-striped table-secondary table-responsive table-sm caption-top">
+                <caption>Єдиний державний реєстр фізичних осіб – підприємців</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">NAME</th>
+                        <th scope="col">ADDRESS</th>
+                        <th scope="col">KVED</th>
+                        <th scope="col">STATE</th>
+                    </tr>
+                </thead>
+                {% if resultEntrepreneurs != 0 %}
+                    <tbody>
+                        {% for row in resultEntrepreneurs %}
+                        <tr>
+                            <td>{{ row['fio'] }}</td>
+                            <td>{{ row['address'] }}</td>
+                            <td>{{ row['kved'] }}</td>
+                            <td>{{ row['stan'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                {% elif resultEntrepreneurs == 0 %}
+                    <tfoot>
+                        <tr>
+                            <td colspan="4" class="bi bi-exclamation-triangle-fill"> The Entrepreneurs register: No data found</td>                    
+                        </tr>
+                    </tfoot>
+                {% endif %}   
+            </table>
+        </div>
+    </div>
 </div>
-
-<div class="container mt-3">
-    <table class="table table-striped table-secondary table-responsive table-sm caption-top">
-        <caption>Єдиний реєстр боржників</caption>
-        <thead>
-            <tr>
-                <th scope="col">DEBTOR NAME</th>
-                <th scope="col">DEBTOR CODE</th>
-                <th scope="col">PUBLISHER</th>
-                <th scope="col">EXECUTIVE SERVICE</th>
-                <th scope="col">EXECUTIVE SERVICE EMPLOYEE</th>
-                <th scope="col">CATEGORY</th>
-            </tr>
-        </thead>
-        {% if resultDebtors != 0 %}
-            <tbody>
-                {% for row in resultDebtors %}
-                <tr>
-                    <td>{{ row['DEBTOR_NAME'] }}</td>
-                    <td>{{ row['DEBTOR_CODE'] }}</td>
-                    <td>{{ row['PUBLISHER'] }}</td>
-                    <td>{{ row['EMP_ORG'] }}</td>
-                    <td>{{ row['EMP_FULL_FIO'] }}</td>
-                    <td>{{ row['VD_CAT'] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        {% elif resultDebtors == 0 %}
-            <tfoot>
-                <tr>
-                    <td colspan="6" class="bi bi-exclamation-triangle-fill"> The debtors register: No data found</td>                    
-                </tr>
-            </tfoot>
-        {% endif %}   
-    </table>
-</div>
-
-<div class="container mt-3">
-    <table class="table table-striped table-secondary table-responsive table-sm caption-top">
-        <caption>Єдиний державний реєстр юридичних осіб та громадських формувань</caption>
-        <thead>
-            <tr>
-                <th scope="col">SHORT NAME</th>
-                <th scope="col">EDRPOU</th>
-                <th scope="col">ADDRESS</th>
-                <th scope="col">KVED</th>
-                <th scope="col">BOSS</th>
-                <th scope="col">FOUNDERS</th>
-                <th scope="col">STATE</th>
-            </tr>
-        </thead>
-        {% if resultLegalEntities != 0 %}
-            <tbody>
-                {% for row in resultLegalEntities %}
-                <tr>
-                    <td>{{ row['short_name'] }}</td>
-                    <td>{{ row['edrpou'] }}</td>
-                    <td>{{ row['address'] }}</td>
-                    <td>{{ row['kved'] }}</td>
-                    <td>{{ row['boss'] }}</td>
-                    <td>{{ row['founders'] }}</td>
-                    <td>{{ row['stan'] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        {% elif resultLegalEntities == 0 %}
-            <tfoot>
-                <tr>
-                    <td colspan="7" class="bi bi-exclamation-triangle-fill"> The legal entities register: No data found</td>                    
-                </tr>
-            </tfoot>
-        {% endif %}   
-    </table>
-</div>
-
-<div class="container mt-3">
-    <table class="table table-striped table-secondary table-responsive table-sm caption-top">
-        <caption>Єдиний державний реєстр фізичних осіб – підприємців</caption>
-        <thead>
-            <tr>
-                <th scope="col">NAME</th>
-                <th scope="col">ADDRESS</th>
-                <th scope="col">KVED</th>
-                <th scope="col">STATE</th>
-            </tr>
-        </thead>
-        {% if resultEntrepreneurs != 0 %}
-            <tbody>
-                {% for row in resultEntrepreneurs %}
-                <tr>
-                    <td>{{ row['fio'] }}</td>
-                    <td>{{ row['address'] }}</td>
-                    <td>{{ row['kved'] }}</td>
-                    <td>{{ row['stan'] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        {% elif resultEntrepreneurs == 0 %}
-            <tfoot>
-                <tr>
-                    <td colspan="4" class="bi bi-exclamation-triangle-fill"> The Entrepreneurs register: No data found</td>                    
-                </tr>
-            </tfoot>
-        {% endif %}   
-    </table>
-</div>  
 
 <div class="navbar fixed-bottom navbar-light" style="background-color: #494a4b;">
     <div class="container-fluid">
@@ -217,5 +250,32 @@
         </span>
     </div>
 </div>
+<script>
+    //Get the button
+    let mybutton = document.getElementById("btn-back-to-top");
+
+    // When the user scrolls down 20px from the top of the document, show the button
+    window.onscroll = function () {
+    scrollFunction();
+    };
+
+    function scrollFunction() {
+    if (
+        document.body.scrollTop > 20 ||
+        document.documentElement.scrollTop > 20
+    ) {
+        mybutton.style.display = "block";
+    } else {
+        mybutton.style.display = "none";
+    }
+    }
+    // When the user clicks on the button, scroll to the top of the document
+    mybutton.addEventListener("click", backToTop);
+
+    function backToTop() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+    }
+</script>
 </body>
 </html>

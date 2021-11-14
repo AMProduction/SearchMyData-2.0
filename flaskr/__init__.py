@@ -33,7 +33,6 @@ def create_app(test_config=None):
         entrepreneurs = EntrepreneursRegister()
         if request.method == 'POST':
             searchString = request.form['search']
-            logging.warning(searchString)
             # call search methods
             resultMissingPersons = missingPersons.searchIntoCollection(
                 searchString)
