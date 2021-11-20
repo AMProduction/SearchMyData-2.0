@@ -47,17 +47,17 @@ class ServiceTools:
             logging.error(
                 f'{self.__class__.__name__}: Config.json is not found')
 
-    def getRegistersInfo(self):
-        result = self.__serviceCol.find({}, {'_id': 1, 'Description': 1, 'DocumentsCount': 1, 'LastModifiedDate': 1}).sort([('_id', 1)])
+    def get_registers_info(self):
+        result = self.__serviceCol.find({}, {'_id': 1, 'Description': 1, 'DocumentsCount': 1, 'LastModifiedDate': 1})\
+            .sort([('_id', 1)])
         return result
 
-    def checkIsExpired(self):
-        isExpired = False
-        expiredTime = datetime.now() - timedelta(days=2)
+    def check_is_expired(self):
+        is_expired = False
+        expired_time = datetime.now() - timedelta(days=2)
         for record in self.__serviceCol.find():
-            lastModifiedDate = datetime.strptime(
-                record['LastModifiedDate'], '%Y-%m-%d %H:%M:%S.%f')
-            if lastModifiedDate < expiredTime:
+            last_modified_date = datetime.strptime(record['LastModifiedDate'], '%Y-%m-%d %H:%M:%S.%f')
+            if last_modified_date < expired_time:
                 logging.warning(record['Description'] + ' is out of date')
-                isExpired = True
-        return isExpired
+                is_expired = True
+        return is_expired

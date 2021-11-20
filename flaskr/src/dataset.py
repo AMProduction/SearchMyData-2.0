@@ -33,57 +33,57 @@ class Dataset:
             try:
                 # Set server Selection Timeout in ms. The default value is 30s.
                 maxSevSelDelay = 3
-                self.dbserver = pymongo.MongoClient(
-                    self.__dbstring, serverSelectionTimeoutMS=maxSevSelDelay)
+                self.dbserver = pymongo.MongoClient(self.__dbstring, serverSelectionTimeoutMS=maxSevSelDelay)
                 self.dbserver.server_info()  # force connection on a request
             except ServerSelectionTimeoutError:
                 logging.error(f'{self.__class__.__name__}: Connection error')
             else:
                 self.db = self.dbserver['searchmydata']
                 logging.warning('Connected to DB')
+                self.service_col = self.db['ServiceCollection']
         # if config.json does not exists
         else:
             logging.error(
                 f'{self.__class__.__name__}: Config.json is not found')
 
-    def getDataset(self):
+    def get_dataset(self):
         pass
 
-    def saveDataset(self):
+    def save_dataset(self):
         pass
 
-    def clearCollection(self):
+    def clear_collection(self):
         pass
 
-    def __createServiceJson(self):
+    def __create_service_json(self):
         pass
 
-    def __updateServiceJson(self):
+    def __update_service_json(self):
         pass
 
-    def updateMetadata(self):
+    def update_metadata(self):
         pass
 
-    def deleteCollectionIndex(self):
+    def delete_collection_index(self):
         pass
 
-    def createCollectionIndex(self):
+    def create_collection_index(self):
         pass
 
-    def searchIntoCollection(self):
+    def search_into_collection(self):
         pass
 
-    def setupDataset(self):
+    def setup_dataset(self):
         pass
 
-    def measureExecutionTime(func):
+    def measure_execution_time(func):
         @wraps(func)
-        def logTime(*args, **kwargs):
+        def log_time(*args, **kwargs):
             start_time = datetime.now()
             try:
                 return func(*args, **kwargs)
             finally:
                 end_time = datetime.now()
                 logging.info(
-                    f'Total execution time {args[0].__class__.__name__}.{func.__name__}: {end_time-start_time}')
-        return logTime
+                    f'Total execution time {args[0].__class__.__name__}.{func.__name__}: {end_time - start_time}')
+        return log_time
