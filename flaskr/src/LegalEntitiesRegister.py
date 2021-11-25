@@ -5,11 +5,11 @@ import os
 import shutil
 import xml.etree.ElementTree as ET
 import zipfile
-import requests
 from datetime import datetime
 from io import BytesIO
-from pymongo.errors import PyMongoError
 
+import requests
+from pymongo.errors import PyMongoError
 
 from .dataset import Dataset
 
@@ -65,7 +65,7 @@ class LegalEntitiesRegister(Dataset):
                 logging.warning('File in ZIP: ' + str(xml_file))
             # unzip all files
             entrepreneurs_zip.extractall('Temp')
-            for xml_file in os.listdir('Temp/'+root_folder_name):
+            for xml_file in os.listdir('Temp/' + root_folder_name):
                 if xml_file.find('_UO_') != -1:
                     # read the legal Entities Xml file
                     path_to_file = 'Temp/' + root_folder_name + xml_file
@@ -81,14 +81,14 @@ class LegalEntitiesRegister(Dataset):
                         kved = record.find('KVED').text
                         boss = record.find('BOSS').text
                         beneficiaries_dict = {}
-                        beneficiaryNumber = 1
+                        beneficiary_number = 1
                         for beneficiaries in record.iter('BENEFICIARIES'):
                             if beneficiaries.find('BENEFICIARY') is not None:
                                 for beneficiary in beneficiaries.iter('BENEFICIARY'):
                                     beneficiary_to_dict = beneficiary.text
-                                    key = 'beneficiary' + str(beneficiaryNumber)
+                                    key = 'beneficiary' + str(beneficiary_number)
                                     beneficiaries_dict[key] = beneficiary_to_dict
-                                    beneficiaryNumber += 1
+                                    beneficiary_number += 1
                         founders_dict = {}
                         founders_number = 1
                         for founders in record.iter('FOUNDERS'):
@@ -147,10 +147,11 @@ class LegalEntitiesRegister(Dataset):
 
     @Dataset.measure_execution_time
     def clear_collection(self):
-        legal_entities_col = self.db['LegalEntities']
-        count_deleted_documents = legal_entities_col.delete_many({})
-        logging.warning('%s documents deleted. The legal entities collection is empty.', str(
-            count_deleted_documents.deleted_count))
+        if self.is_collection_exists('LegalEntities'):
+            legal_entities_col = self.db['LegalEntities']
+            count_deleted_documents = legal_entities_col.delete_many({})
+            logging.warning(f'{count_deleted_documents.deleted_count} documents deleted. The legal entities '
+                            f'collection is empty.')
 
     @Dataset.measure_execution_time
     def __create_service_json(self):
@@ -180,9 +181,9 @@ class LegalEntitiesRegister(Dataset):
 
     @Dataset.measure_execution_time
     def update_metadata(self):
-        collections_list = self.db.list_collection_names()
         # update or create LegalEntitiesRegisterServiceJson
-        if ('ServiceCollection' in collections_list) and (self.service_col.count_documents({'_id': 4}, limit=1) != 0):
+        if (self.is_collection_exists('ServiceCollection')) and (
+                self.service_col.count_documents({'_id': 4}, limit=1) != 0):
             self.__update_service_json()
             logging.info('LegalEntitiesRegisterServiceJson updated')
         else:
@@ -191,10 +192,11 @@ class LegalEntitiesRegister(Dataset):
 
     @Dataset.measure_execution_time
     def delete_collection_index(self):
-        legal_entities_col = self.db['LegalEntities']
-        if 'full_text' in legal_entities_col.index_information():
-            legal_entities_col.drop_index('full_text')
-            logging.warning('LegalEntities Text index deleted')
+        if self.is_collection_exists('LegalEntities'):
+            legal_entities_col = self.db['LegalEntities']
+            if 'full_text' in legal_entities_col.index_information():
+                legal_entities_col.drop_index('full_text')
+                logging.warning('LegalEntities Text index deleted')
 
     @Dataset.measure_execution_time
     def create_collection_index(self):
@@ -216,9 +218,9 @@ class LegalEntitiesRegister(Dataset):
                 logging.warning('The legal entities register: No data found')
                 final_result = 0
             else:
-                logging.warning('The legal entities register: %s records found', str(result_count))
+                logging.warning(f'The legal entities register: {result_count} records found')
                 final_result = legal_entities_col.find({'$text': {'$search': query_string}},
-                                                       {'score': {'$meta': 'textScore'}})\
+                                                       {'score': {'$meta': 'textScore'}}) \
                     .sort([('score', {'$meta': 'textScore'})]).allow_disk_use(True)
         gc.collect()
         return final_result

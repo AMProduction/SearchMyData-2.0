@@ -1,17 +1,16 @@
 import gc
 import json
 import logging
+import mmap
 import os
 import shutil
 import zipfile
-import mmap
-import requests
 from datetime import datetime
 from io import BytesIO
-from pymongo.errors import PyMongoError
 
-
+import requests
 from dask import dataframe as dd
+from pymongo.errors import PyMongoError
 
 from .dataset import Dataset
 
@@ -71,7 +70,7 @@ class DebtorsRegister(Dataset):
             # convert CSV to JSON using Dask
             debtors_csv.to_json('debtorsJson')
             for file in os.listdir('debtorsJson'):
-                file_object = open('debtorsJson/'+file, mode='r')
+                file_object = open('debtorsJson/' + file, mode='r')
                 # map the entire file into memory, size 0 means whole file, normally much faster than buffered i/o
                 mm = mmap.mmap(file_object.fileno(), 0, access=mmap.ACCESS_READ)
                 # iterate over the block, until next newline
@@ -93,10 +92,11 @@ class DebtorsRegister(Dataset):
 
     @Dataset.measure_execution_time
     def __clear_collection(self):
-        debtors_col = self.db['Debtors']
-        count_deleted_documents = debtors_col.delete_many({})
-        logging.warning('%s documents deleted. The wanted persons collection is empty.', str(
-            count_deleted_documents.deleted_count))
+        if self.is_collection_exists('Debtors'):
+            debtors_col = self.db['Debtors']
+            count_deleted_documents = debtors_col.delete_many({})
+            logging.warning(f'{count_deleted_documents.deleted_count} documents deleted. The wanted persons '
+                            f'collection is empty.')
 
     @Dataset.measure_execution_time
     def __create_service_json(self):
@@ -126,9 +126,9 @@ class DebtorsRegister(Dataset):
 
     @Dataset.measure_execution_time
     def __update_metadata(self):
-        collections_list = self.db.list_collection_names()
         # update or create DebtorsRegisterServiceJson
-        if ('ServiceCollection' in collections_list) and (self.service_col.count_documents({'_id': 3}, limit=1) != 0):
+        if (self.is_collection_exists('ServiceCollection')) and (
+                self.service_col.count_documents({'_id': 3}, limit=1) != 0):
             self.__update_service_json()
             logging.info('DebtorsRegisterServiceJson updated')
         else:
@@ -137,10 +137,11 @@ class DebtorsRegister(Dataset):
 
     @Dataset.measure_execution_time
     def __delete_collection_index(self):
-        debtors_col = self.db['Debtors']
-        if 'full_text' in debtors_col.index_information():
-            debtors_col.drop_index('full_text')
-            logging.warning('Debtors Text index deleted')
+        if self.is_collection_exists('Debtors'):
+            debtors_col = self.db['Debtors']
+            if 'full_text' in debtors_col.index_information():
+                debtors_col.drop_index('full_text')
+                logging.warning('Debtors Text index deleted')
 
     @Dataset.measure_execution_time
     def __create_collection_index(self):
@@ -153,16 +154,16 @@ class DebtorsRegister(Dataset):
         debtors_col = self.db['Debtors']
         final_result = 0
         try:
-            resultCount = debtors_col.count_documents({'$text': {'$search': query_string}})
+            result_count = debtors_col.count_documents({'$text': {'$search': query_string}})
         except PyMongoError:
             logging.error('Error during search into Debtors Register')
         else:
-            if resultCount == 0:
+            if result_count == 0:
                 logging.warning('The debtors register: No data found')
                 final_result = 0
             else:
-                logging.warning('The debtors register: %s records found', str(resultCount))
-                final_result = debtors_col.find({'$text': {'$search': query_string}}, {'score': {'$meta': 'textScore'}})\
+                logging.warning(f'The debtors register: {result_count} records found')
+                final_result = debtors_col.find({'$text': {'$search': query_string}}, {'score': {'$meta': 'textScore'}}) \
                     .sort([('score', {'$meta': 'textScore'})]).allow_disk_use(True)
         gc.collect()
         return final_result

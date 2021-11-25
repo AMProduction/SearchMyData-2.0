@@ -1,8 +1,8 @@
 import gc
 import logging
 from datetime import datetime
-from pymongo.errors import PyMongoError
 
+from pymongo.errors import PyMongoError
 
 from .dataset import Dataset
 
@@ -21,10 +21,11 @@ class EntrepreneursRegister(Dataset):
 
     @Dataset.measure_execution_time
     def clear_collection(self):
-        entrepreneurs_col = self.db['Entrepreneurs']
-        count_deleted_documents = entrepreneurs_col.delete_many({})
-        logging.warning('%s documents deleted. The entrepreneurs collection is empty.', str(
-            count_deleted_documents.deleted_count))
+        if self.is_collection_exists('Entrepreneurs'):
+            entrepreneurs_col = self.db['Entrepreneurs']
+            count_deleted_documents = entrepreneurs_col.delete_many({})
+            logging.warning(f'{count_deleted_documents.deleted_count} documents deleted. The entrepreneurs collection '
+                            f'is empty.')
 
     @Dataset.measure_execution_time
     def __create_service_json(self):
@@ -54,9 +55,9 @@ class EntrepreneursRegister(Dataset):
 
     @Dataset.measure_execution_time
     def update_metadata(self):
-        collections_list = self.db.list_collection_names()
         # update or create EntrepreneursRegisterServiceJson
-        if ('ServiceCollection' in collections_list) and (self.service_col.count_documents({'_id': 5}, limit=1) != 0):
+        if (self.is_collection_exists('ServiceCollection')) and (
+                self.service_col.count_documents({'_id': 5}, limit=1) != 0):
             self.__update_service_json()
             logging.info('EntrepreneursRegisterServiceJson updated')
         else:
@@ -65,10 +66,11 @@ class EntrepreneursRegister(Dataset):
 
     @Dataset.measure_execution_time
     def delete_collection_index(self):
-        entrepreneurs_col = self.db['Entrepreneurs']
-        if 'full_text' in entrepreneurs_col.index_information():
-            entrepreneurs_col.drop_index('full_text')
-            logging.warning('Entrepreneurs Text index deleted')
+        if self.is_collection_exists('Entrepreneurs'):
+            entrepreneurs_col = self.db['Entrepreneurs']
+            if 'full_text' in entrepreneurs_col.index_information():
+                entrepreneurs_col.drop_index('full_text')
+                logging.warning('Entrepreneurs Text index deleted')
 
     @Dataset.measure_execution_time
     def create_collection_index(self):
@@ -81,17 +83,17 @@ class EntrepreneursRegister(Dataset):
         entrepreneurs_col = self.db['Entrepreneurs']
         final_result = 0
         try:
-            resultCount = entrepreneurs_col.count_documents({'$text': {'$search': query_string}})
+            result_count = entrepreneurs_col.count_documents({'$text': {'$search': query_string}})
         except PyMongoError:
             logging.error('Error during search into Entrepreneurs Register')
         else:
-            if resultCount == 0:
+            if result_count == 0:
                 logging.warning('The Entrepreneurs register: No data found')
                 final_result = 0
             else:
-                logging.warning('The Entrepreneurs register: %s records found', str(resultCount))
+                logging.warning(f'The Entrepreneurs register: {result_count} records found')
                 final_result = entrepreneurs_col.find({'$text': {'$search': query_string}},
-                                                     {'score': {'$meta': 'textScore'}})\
-                    .sort([('score',{'$meta': 'textScore'})]).allow_disk_use(True)
+                                                      {'score': {'$meta': 'textScore'}}) \
+                    .sort([('score', {'$meta': 'textScore'})]).allow_disk_use(True)
         gc.collect()
         return final_result

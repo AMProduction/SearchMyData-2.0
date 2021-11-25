@@ -1,10 +1,10 @@
 import gc
 import json
 import logging
-import requests
 from datetime import datetime
-from pymongo.errors import PyMongoError
 
+import requests
+from pymongo.errors import PyMongoError
 
 from .dataset import Dataset
 
@@ -59,10 +59,11 @@ class MissingPersonsRegister(Dataset):
 
     @Dataset.measure_execution_time
     def __clear_collection(self):
-        missing_persons_col = self.db['MissingPersons']
-        count_deleted_documents = missing_persons_col.delete_many({})
-        logging.warning('%s documents deleted. The missing persons collection is empty.', str(
-            count_deleted_documents.deleted_count))
+        if self.is_collection_exists('MissingPersons'):
+            missing_persons_col = self.db['MissingPersons']
+            count_deleted_documents = missing_persons_col.delete_many({})
+            logging.warning(f'{count_deleted_documents.deleted_count} documents deleted. The missing persons '
+                            f'collection is empty.')
 
     @Dataset.measure_execution_time
     def __create_service_json(self):
@@ -92,9 +93,9 @@ class MissingPersonsRegister(Dataset):
 
     @Dataset.measure_execution_time
     def __update_metadata(self):
-        collections_list = self.db.list_collection_names()
         # update or create MissingPersonsRegisterServiceJson
-        if ('ServiceCollection' in collections_list) and (self.service_col.count_documents({'_id': 1}, limit=1) != 0):
+        if (self.is_collection_exists('ServiceCollection')) and (
+                self.service_col.count_documents({'_id': 1}, limit=1) != 0):
             self.__update_service_json()
             logging.info('MissingPersonsRegisterServiceJson updated')
         else:
@@ -103,10 +104,11 @@ class MissingPersonsRegister(Dataset):
 
     @Dataset.measure_execution_time
     def __delete_collection_index(self):
-        missing_persons_col = self.db['MissingPersons']
-        if 'full_text' in missing_persons_col.index_information():
-            missing_persons_col.drop_index('full_text')
-            logging.warning('Missing persons Text index deleted')
+        if self.is_collection_exists('MissingPersons'):
+            missing_persons_col = self.db['MissingPersons']
+            if 'full_text' in missing_persons_col.index_information():
+                missing_persons_col.drop_index('full_text')
+                logging.warning('Missing persons Text index deleted')
 
     @Dataset.measure_execution_time
     def __create_collection_index(self):
@@ -128,10 +130,10 @@ class MissingPersonsRegister(Dataset):
                 logging.warning('The missing persons register: No data found')
                 final_result = 0
             else:
-                logging.warning('The missing persons register: %s records found', str(result_count))
+                logging.warning(f'The missing persons register: {result_count} records found')
                 final_result = missing_persons_col.find({'$text': {'$search': query_string}},
-                                                        {'score': {'$meta': 'textScore'}})\
-                    .sort([('score', {'$meta': 'textScore'})])
+                                                        {'score': {'$meta': 'textScore'}}) \
+                    .sort([('score', {'$meta': 'textScore'})]).allow_disk_use(True)
         gc.collect()
         return final_result
 
