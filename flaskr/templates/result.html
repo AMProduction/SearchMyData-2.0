@@ -75,6 +75,12 @@
                 register
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="Lustrated-tab" data-bs-toggle="tab" data-bs-target="#Lustrated"
+                    type="button" role="tab" aria-controls="Lustrated" aria-selected="false">The Lustrated Persons
+                Register
+            </button>
+        </li>
     </ul>
 
     <!-- Tab panes -->
@@ -260,6 +266,41 @@
                     <tfoot>
                     <tr>
                         <td colspan="4" class="bi bi-exclamation-triangle-fill"> The Entrepreneurs register: No data
+                            found
+                        </td>
+                    </tr>
+                    </tfoot>
+                {% endif %}
+            </table>
+        </div>
+        <div class="tab-pane" id="Lustrated" role="tabpanel" aria-labelledby="Lustrated-tab">
+            <table class="table table-striped table-secondary table-responsive table-sm caption-top">
+                <caption>Єдиний державний реєстр осіб, щодо яких застосовано положення Закону України «Про очищення
+                    влади»
+                </caption>
+                <thead>
+                <tr>
+                    <th scope="col">NAME</th>
+                    <th scope="col">JOB</th>
+                    <th scope="col">JUDGMENT COMPOSITION</th>
+                    <th scope="col">PERIOD</th>
+                </tr>
+                </thead>
+                {% if resultLustrated != 0 %}
+                    <tbody>
+                    {% for row in resultLustrated %}
+                        <tr>
+                            <td>{{ row['fio'] }}</td>
+                            <td>{{ row['job'] }}</td>
+                            <td>{{ row['judgment_composition'] }}</td>
+                            <td>{{ row['period'] }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                {% elif resultLustrated == 0 %}
+                    <tfoot>
+                    <tr>
+                        <td colspan="4" class="bi bi-exclamation-triangle-fill"> The Lustrated Persons register: No data
                             found
                         </td>
                     </tr>

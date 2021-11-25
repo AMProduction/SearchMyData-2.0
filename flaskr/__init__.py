@@ -24,12 +24,14 @@ def create_app():
         from .src.LegalEntitiesRegister import LegalEntitiesRegister
         from .src.MissingPersonsRegister import MissingPersonsRegister
         from .src.WantedPersonsRegister import WantedPersonsRegister
+        from .src.LustratedPersonsRegister import LustratedPersonsRegister
         # create instances
         missing_persons = MissingPersonsRegister()
         wanted_persons = WantedPersonsRegister()
         debtors = DebtorsRegister()
         legal_entities = LegalEntitiesRegister()
         entrepreneurs = EntrepreneursRegister()
+        lustrated = LustratedPersonsRegister()
         if request.method == 'POST':
             search_string = request.form['search']
             # call search methods
@@ -38,8 +40,10 @@ def create_app():
             result_debtors = debtors.search_into_collection(search_string)
             result_legal_entities = legal_entities.search_into_collection(search_string)
             result_entrepreneurs = entrepreneurs.search_into_collection(search_string)
+            result_lustrated = lustrated.search_into_collection(search_string)
             return render_template('result.html', resultMissingPersons=result_missing_persons,
                                    resultWantedPersons=result_wanted_persons, resultDebtors=result_debtors,
-                                   resultLegalEntities=result_legal_entities, resultEntrepreneurs=result_entrepreneurs)
+                                   resultLegalEntities=result_legal_entities, resultEntrepreneurs=result_entrepreneurs,
+                                   resultLustrated=result_lustrated)
 
     return app
