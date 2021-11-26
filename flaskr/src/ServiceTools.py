@@ -1,15 +1,23 @@
 import json
 import logging
-import os
-from pathlib import Path
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import pymongo
-from prettytable import PrettyTable
 from pymongo.errors import ServerSelectionTimeoutError
 
 
 class ServiceTools:
+    """Class for service purpose
+
+    --------
+    Methods:
+    --------
+          get_registers_info():
+            Show the list of available registers, count of documents, and the last update date
+          check_is_expired():
+            Check if a dataset last updated date is older than 2 days ago
+    """
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
@@ -48,16 +56,20 @@ class ServiceTools:
                 f'{self.__class__.__name__}: Config.json is not found')
 
     def get_registers_info(self):
-        result = self.__serviceCol.find({}, {'_id': 1, 'Description': 1, 'DocumentsCount': 1, 'LastModifiedDate': 1})\
+        """Show the list of available registers, count of documents, and the last update date
+                """
+        result = self.__serviceCol.find({}, {'_id': 1, 'Description': 1, 'DocumentsCount': 1, 'LastModifiedDate': 1}) \
             .sort([('_id', 1)])
         return result
 
     def check_is_expired(self):
+        """Check if a dataset last updated date is older than 2 days ago
+        """
         is_expired = False
         expired_time = datetime.now() - timedelta(days=2)
         for record in self.__serviceCol.find():
             last_modified_date = datetime.strptime(record['LastModifiedDate'], '%Y-%m-%d %H:%M:%S.%f')
             if last_modified_date < expired_time:
-                logging.warning(record['Description'] + ' is out of date')
+                logging.warning(f'{record["Description"]} is out of date')
                 is_expired = True
         return is_expired
