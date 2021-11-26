@@ -11,3 +11,7 @@ and [Integrated Unified State Register of Lustrated Persons](https://data.gov.ua
 * 16Gb+ RAM
 * SSD
 ## See additional info into [the SearchMyData-2.0 App wiki](https://github.com/AMProduction/SearchMyData-2.0/wiki)
+***
+Developed in [PyCharm](https://www.jetbrains.com/pycharm/) - The Python IDE for Professional Developers.  
+License kindly provided by [JetBrains Community Support Team](https://www.jetbrains.com/community/opensource/#support)  
+![JetBrains Logo (Main) logo](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg) ![PyCharm logo](https://resources.jetbrains.com/storage/products/company/brand/logos/PyCharm.svg) ![PyCharm logo](https://resources.jetbrains.com/storage/products/company/brand/logos/PyCharm_icon.svg)
