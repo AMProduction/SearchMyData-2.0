@@ -9,6 +9,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
             crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+            integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.0/font/bootstrap-icons.css">
     <style>
         body {
@@ -31,9 +34,6 @@
         <ul class="navbar-nav">
             <li class="nav-item">
                 <a class="nav-link bi bi-chevron-double-left" href="/"> Back</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link bi bi-cloud-download-fill" href="#"> Save results</a>
             </li>
         </ul>
     </div>
@@ -121,6 +121,12 @@
                     </tfoot>
                 {% endif %}
             </table>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="button" class="btn btn-secondary bi bi-cloud-download-fill"
+                        onclick="saveSearchResultToFile('MissingPersons');"
+                        {% if resultMissingPersons == 0 %} disabled {% endif %}> Save
+                </button>
+            </div>
         </div>
         <div class="tab-pane" id="WantedPersons" role="tabpanel" aria-labelledby="WantedPersons-tab">
             <table class="table table-striped table-secondary table-responsive table-sm caption-top">
@@ -164,6 +170,12 @@
                     </tfoot>
                 {% endif %}
             </table>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="button" class="btn btn-secondary bi bi-cloud-download-fill"
+                        onclick="saveSearchResultToFile('WantedPersons');"
+                        {% if resultWantedPersons == 0 %} disabled {% endif %}> Save
+                </button>
+            </div>
         </div>
         <div class="tab-pane" id="Debtors" role="tabpanel" aria-labelledby="Debtors-tab">
             <table class="table table-striped table-secondary table-responsive table-sm caption-top">
@@ -200,6 +212,12 @@
                     </tfoot>
                 {% endif %}
             </table>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="button" class="btn btn-secondary bi bi-cloud-download-fill"
+                        onclick="saveSearchResultToFile('Debtors');"
+                        {% if resultDebtors == 0 %} disabled {% endif %}> Save
+                </button>
+            </div>
         </div>
         <div class="tab-pane" id="LegalEntities" role="tabpanel" aria-labelledby="LegalEntities-tab">
             <table class="table table-striped table-secondary table-responsive table-sm caption-top">
@@ -239,6 +257,12 @@
                     </tfoot>
                 {% endif %}
             </table>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="button" class="btn btn-secondary bi bi-cloud-download-fill"
+                        onclick="saveSearchResultToFile('LegalEntities');"
+                        {% if resultLegalEntities == 0 %} disabled {% endif %}> Save
+                </button>
+            </div>
         </div>
         <div class="tab-pane" id="Entrepreneurs" role="tabpanel" aria-labelledby="Entrepreneurs-tab">
             <table class="table table-striped table-secondary table-responsive table-sm caption-top">
@@ -272,6 +296,12 @@
                     </tfoot>
                 {% endif %}
             </table>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="button" class="btn btn-secondary bi bi-cloud-download-fill"
+                        onclick="saveSearchResultToFile('Entrepreneurs');"
+                        {% if resultEntrepreneurs == 0 %} disabled {% endif %}> Save
+                </button>
+            </div>
         </div>
         <div class="tab-pane" id="Lustrated" role="tabpanel" aria-labelledby="Lustrated-tab">
             <table class="table table-striped table-secondary table-responsive table-sm caption-top">
@@ -307,6 +337,12 @@
                     </tfoot>
                 {% endif %}
             </table>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="button" class="btn btn-secondary bi bi-cloud-download-fill"
+                        onclick="saveSearchResultToFile('Lustrated');"
+                        {% if resultLustrated == 0 %} disabled {% endif %}> Save
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -345,6 +381,19 @@
     function backToTop() {
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
+    }
+
+    function saveSearchResultToFile(register_name) {
+        const element = document.getElementById(register_name);
+        const pdf_filename = register_name + '.pdf';
+        let opt = {
+            margin: 3,
+            filename: pdf_filename,
+            image: {type: 'jpeg', quality: 0.95},
+            html2canvas: {backgroundColor: null},
+            jsPDF: {unit: 'mm', format: 'a4', orientation: 'landscape'}
+        };
+        html2pdf().set(opt).from(element).save();
     }
 </script>
 </body>
