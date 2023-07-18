@@ -1,3 +1,5 @@
+#  Copyright (c) 2023 Andrii Malchyk, All rights reserved.
+
 import json
 import logging
 from datetime import datetime, timedelta
