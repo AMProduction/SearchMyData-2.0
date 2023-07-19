@@ -1,10 +1,5 @@
-pymongo~=4.4.1
-pytest~=7.4.0
-requests~=2.31.0
-dask~=2023.7.0
-Flask~=2.2.5
-Werkzeug==2.3.4
-WTForms==3.0.1
-flask-mongoengine==1.0.0
-flask-restx==1.1.0
-Flask-WTF==1.1.1
+pymongo>=4.4.1
+pytest>=7.4.0
+requests>=2.31.0
+dask>=2023.7.0
+Flask>=2.3.2
