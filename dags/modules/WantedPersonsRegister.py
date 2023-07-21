@@ -12,8 +12,8 @@ from .dataset import Dataset
 
 
 class WantedPersonsRegister(Dataset):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, connection_string):
+        super().__init__(connection_string)
 
     @Dataset.measure_execution_time
     def __get_dataset(self):

@@ -18,14 +18,14 @@ from .dataset import Dataset
 
 
 class DebtorsRegister(Dataset):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, connection_string):
+        super().__init__(connection_string)
 
     @Dataset.measure_execution_time
     def __get_dataset(self):
         try:
             general_dataset = requests.get(
-                'https://data.gov.ua/api/3/action/package_show?id=506734bf-2480-448c-a2b4-90b6d06df11e').text
+                    'https://data.gov.ua/api/3/action/package_show?id=506734bf-2480-448c-a2b4-90b6d06df11e').text
         except ConnectionError:
             logging.error('Error during general DebtorsRegister dataset JSON receiving occured')
         else:
@@ -36,7 +36,7 @@ class DebtorsRegister(Dataset):
         try:
             # get resources JSON id
             debtors_general_dataset_id_json = requests.get(
-                'https://data.gov.ua/api/3/action/resource_show?id=' + debtors_general_dataset_id).text
+                    'https://data.gov.ua/api/3/action/resource_show?id=' + debtors_general_dataset_id).text
         except ConnectionError:
             logging.error('Error during DebtorsRegister resources JSON id receiving occured')
         else:
@@ -66,9 +66,10 @@ class DebtorsRegister(Dataset):
             debtors_zip.close()
             # read CSV using Dask
             debtors_csv = dd.read_csv(debtors_csv_file_name, encoding='windows-1251', header=None, skiprows=[0],
-                                      dtype={1: 'object'}, names=['DEBTOR_NAME', 'DEBTOR_CODE', 'PUBLISHER',
-                                                                  'EMP_FULL_FIO', 'EMP_ORG', 'ORG_PHONE', 'EMAIL_ADDR',
-                                                                  'VP_ORDERNUM', 'VD_CAT'])
+                                      dtype={1: 'object', 'DEBTOR_NAME': 'object'},
+                                      names=['DEBTOR_NAME', 'DEBTOR_CODE', 'PUBLISHER',
+                                             'EMP_FULL_FIO', 'EMP_ORG', 'ORG_PHONE', 'EMAIL_ADDR',
+                                             'VP_ORDERNUM', 'VD_CAT'])
             # convert CSV to JSON using Dask
             debtors_csv.to_json('debtorsJson')
             for file in os.listdir('debtorsJson'):
@@ -107,11 +108,11 @@ class DebtorsRegister(Dataset):
         debtors_col = self.db['Debtors']
         documents_count = debtors_col.count_documents({})
         debtors_register_service_json = {
-            '_id': 3,
-            'Description': 'Єдиний реєстр боржників',
-            'DocumentsCount': documents_count,
-            'CreatedDate': str(created_date),
-            'LastModifiedDate': str(last_modified_date)
+                '_id': 3,
+                'Description': 'Єдиний реєстр боржників',
+                'DocumentsCount': documents_count,
+                'CreatedDate': str(created_date),
+                'LastModifiedDate': str(last_modified_date)
         }
         self.service_col.insert_one(debtors_register_service_json)
 
@@ -121,9 +122,9 @@ class DebtorsRegister(Dataset):
         debtors_col = self.db['Debtors']
         documents_count = debtors_col.count_documents({})
         self.service_col.update_one(
-            {'_id': 3},
-            {'$set': {'LastModifiedDate': str(last_modified_date),
-                      'DocumentsCount': documents_count}}
+                {'_id': 3},
+                {'$set': {'LastModifiedDate': str(last_modified_date),
+                          'DocumentsCount': documents_count}}
         )
 
     @Dataset.measure_execution_time
