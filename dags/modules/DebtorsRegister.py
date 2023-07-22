@@ -9,6 +9,9 @@ import shutil
 import zipfile
 from datetime import datetime
 from io import BytesIO
+import polars as pl
+import pandas as pd
+import csv
 
 import requests
 from dask import dataframe as dd
@@ -62,35 +65,54 @@ class DebtorsRegister(Dataset):
             for csvFile in debtors_zip.namelist():
                 logging.warning('File in ZIP: ' + str(csvFile))
                 debtors_csv_file_name = str(csvFile)
+            # df = pd.read_csv(debtors_zip.open(debtors_csv_file_name), encoding='windows-1251', dtype={1: 'object'})
+            # print(df.head(10))
+            print("Exctracting")
             debtors_zip.extractall()
             debtors_zip.close()
-            # read CSV using Dask
-            debtors_csv = dd.read_csv(debtors_csv_file_name, encoding='windows-1251', header=None, skiprows=[0],
-                                      dtype={1: 'object', 'DEBTOR_NAME': 'object'},
-                                      names=['DEBTOR_NAME', 'DEBTOR_CODE', 'PUBLISHER',
-                                             'EMP_FULL_FIO', 'EMP_ORG', 'ORG_PHONE', 'EMAIL_ADDR',
-                                             'VP_ORDERNUM', 'VD_CAT'])
-            # convert CSV to JSON using Dask
-            debtors_csv.to_json('debtorsJson')
-            for file in os.listdir('debtorsJson'):
-                file_object = open('debtorsJson/' + file, mode='r')
-                # map the entire file into memory, size 0 means whole file, normally much faster than buffered i/o
-                mm = mmap.mmap(file_object.fileno(), 0, access=mmap.ACCESS_READ)
-                # iterate over the block, until next newline
-                for line in iter(mm.readline, b''):
-                    debtors_json = json.loads(line)
-                    try:
-                        # save to the collection
-                        debtors_col.insert_one(debtors_json)
-                    except PyMongoError:
-                        logging.error('Error during saving Debtors Register into Database')
-                mm.close()
-                file_object.close()
-            logging.info('Debtors dataset was saved into the database')
+            print("End extracting")
+            # df = pl.read_csv(debtors_csv_file_name, encoding='windows-1251', low_memory=True)
+            # print(df.head(10))
+            i = 0
+            print("start read")
+            with open(debtors_csv_file_name, "r", encoding='windows-1251',) as csvfile:
+                datareader = csv.reader(csvfile)
+                print("end read")
+                for row in datareader:
+                    print(i)
+                    if i == 5:
+                        break
+                    print(row)
+                    print(type(row))
+                    i += 1
+
+        #     # read CSV using Dask
+        #     debtors_csv = dd.read_csv(debtors_csv_file_name, encoding='windows-1251', header=None, skiprows=[0],
+        #                               dtype={1: 'object', 'DEBTOR_NAME': 'object'},
+        #                               names=['DEBTOR_NAME', 'DEBTOR_CODE', 'PUBLISHER',
+        #                                      'EMP_FULL_FIO', 'EMP_ORG', 'ORG_PHONE', 'EMAIL_ADDR',
+        #                                      'VP_ORDERNUM', 'VD_CAT'])
+        #     # convert CSV to JSON using Dask
+        #     debtors_csv.to_json('debtorsJson')
+        #     for file in os.listdir('debtorsJson'):
+        #         file_object = open('debtorsJson/' + file, mode='r')
+        #         # map the entire file into memory, size 0 means whole file, normally much faster than buffered i/o
+        #         mm = mmap.mmap(file_object.fileno(), 0, access=mmap.ACCESS_READ)
+        #         # iterate over the block, until next newline
+        #         for line in iter(mm.readline, b''):
+        #             debtors_json = json.loads(line)
+        #             try:
+        #                 # save to the collection
+        #                 debtors_col.insert_one(debtors_json)
+        #             except PyMongoError:
+        #                 logging.error('Error during saving Debtors Register into Database')
+        #         mm.close()
+        #         file_object.close()
+        #     logging.info('Debtors dataset was saved into the database')
         finally:
             # delete temp files
             os.remove(debtors_csv_file_name)
-            shutil.rmtree('debtorsJson', ignore_errors=True)
+        #     shutil.rmtree('debtorsJson', ignore_errors=True)
         gc.collect()
 
     @Dataset.measure_execution_time
