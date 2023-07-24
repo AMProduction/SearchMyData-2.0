@@ -3,7 +3,6 @@
 import gc
 import json
 import logging
-import os
 import xml.etree.ElementTree as ET
 import zipfile
 from datetime import datetime
@@ -54,38 +53,30 @@ class LustratedPersonsRegister(Dataset):
             logging.error('Error during LustratedPersonsRegister ZIP receiving occurred')
         else:
             logging.info('A LustratedPersonsRegister dataset received')
-            # get lists of files
-            lustrated_zip = zipfile.ZipFile(BytesIO(lustrated_dataset_zip), 'r')
-            # go inside ZIP
-            for xml_file in lustrated_zip.namelist():
-                file_name = str(xml_file)
-                logging.warning(f'File in ZIP: {file_name}')
-            # unzip
-            lustrated_zip.extractall()
-            lustrated_zip.close()
-            # parse xml
-            tree = ET.parse(file_name)
-            xml_data = tree.getroot()
-            for record in xml_data:
-                fio = record.find('FIO').text
-                job = record.find('JOB').text
-                judgment_composition = record.find('JUDGMENT_COMPOSITION').text
-                period = record.find('PERIOD').text
-                lustrated_json = {
-                        'fio': fio,
-                        'job': job,
-                        'judgment_composition': judgment_composition,
-                        'period': period
-                }
-                try:
-                    # save to the collection
-                    lustrated_col.insert_one(lustrated_json)
-                except PyMongoError:
-                    logging.error(f'Error during saving {lustrated_json} into Database')
-            logging.info('Lustrated Persons dataset was saved into the database')
-        finally:
-            # delete temp files
-            os.remove(file_name)
+            with zipfile.ZipFile(BytesIO(lustrated_dataset_zip), 'r') as zip:
+                for xml_file in zip.namelist():
+                    logging.warning(f'File in ZIP: {xml_file}')
+                    with zip.open(xml_file) as f:
+                        # parse xml
+                        tree = ET.parse(f)
+                        xml_data = tree.getroot()
+                        for record in xml_data:
+                            fio = record.find('FIO').text
+                            job = record.find('JOB').text
+                            judgment_composition = record.find('JUDGMENT_COMPOSITION').text
+                            period = record.find('PERIOD').text
+                            lustrated_json = {
+                                    'fio': fio,
+                                    'job': job,
+                                    'judgment_composition': judgment_composition,
+                                    'period': period
+                            }
+                            try:
+                                # save to the collection
+                                lustrated_col.insert_one(lustrated_json)
+                            except PyMongoError:
+                                logging.error(f'Error during saving {lustrated_json} into Database')
+                        logging.info('Lustrated Persons dataset was saved into the database')
         gc.collect()
 
     @Dataset.measure_execution_time
