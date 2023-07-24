@@ -4,7 +4,6 @@ import gc
 import json
 import logging
 import os
-import shutil
 import xml.etree.ElementTree as ET
 import zipfile
 from datetime import datetime
@@ -24,7 +23,7 @@ class LustratedPersonsRegister(Dataset):
     def __get_dataset(self):
         try:
             general_dataset = requests.get(
-                'https://data.gov.ua/api/3/action/package_show?id=8faa71c1-3a54-45e8-8f6e-06c92b1ff8bc').text
+                    'https://data.gov.ua/api/3/action/package_show?id=8faa71c1-3a54-45e8-8f6e-06c92b1ff8bc').text
         except ConnectionError:
             logging.error('Error during general LustratedPersonsRegister dataset JSON receiving occurred')
         else:
@@ -35,7 +34,7 @@ class LustratedPersonsRegister(Dataset):
         try:
             # get resources JSON id
             lustrated_persons_general_dataset_id_json = requests.get(
-                'https://data.gov.ua/api/3/action/resource_show?id=' + lustrated_persons_general_dataset_id).text
+                    'https://data.gov.ua/api/3/action/resource_show?id=' + lustrated_persons_general_dataset_id).text
         except ConnectionError:
             logging.error('Error during LustratedPersonsRegister resources JSON id receiving occurred')
         else:
@@ -58,43 +57,35 @@ class LustratedPersonsRegister(Dataset):
             # get lists of files
             lustrated_zip = zipfile.ZipFile(BytesIO(lustrated_dataset_zip), 'r')
             # go inside ZIP
-            root_folder_name = ''
             for xml_file in lustrated_zip.namelist():
-                # skip root folder
-                if xml_file.endswith('/'):
-                    root_folder_name = xml_file
-                    continue
-                logging.warning('File in ZIP: ' + str(xml_file))
+                file_name = str(xml_file)
+                logging.warning(f'File in ZIP: {file_name}')
             # unzip
-            lustrated_zip.extractall('Temp')
+            lustrated_zip.extractall()
             lustrated_zip.close()
-            for xml_file in os.listdir('Temp/' + root_folder_name):
-                # read the lustrated persons Xml file
-                path_to_file = 'Temp/' + root_folder_name + xml_file
-                # parse xml
-                lustrated_json = {}
-                tree = ET.parse(path_to_file)
-                xml_data = tree.getroot()
-                for record in xml_data:
-                    fio = record.find('FIO').text
-                    job = record.find('JOB').text
-                    judgment_composition = record.find('JUDGMENT_COMPOSITION').text
-                    period = record.find('PERIOD').text
-                    lustrated_json = {
+            # parse xml
+            tree = ET.parse(file_name)
+            xml_data = tree.getroot()
+            for record in xml_data:
+                fio = record.find('FIO').text
+                job = record.find('JOB').text
+                judgment_composition = record.find('JUDGMENT_COMPOSITION').text
+                period = record.find('PERIOD').text
+                lustrated_json = {
                         'fio': fio,
                         'job': job,
                         'judgment_composition': judgment_composition,
                         'period': period
-                    }
-                    try:
-                        # save to the collection
-                        lustrated_col.insert_one(lustrated_json)
-                    except PyMongoError:
-                        logging.error('Error during saving Lustrated Persons Register into Database')
-                logging.info('Lustrated Persons dataset was saved into the database')
+                }
+                try:
+                    # save to the collection
+                    lustrated_col.insert_one(lustrated_json)
+                except PyMongoError:
+                    logging.error(f'Error during saving {lustrated_json} into Database')
+            logging.info('Lustrated Persons dataset was saved into the database')
         finally:
             # delete temp files
-            shutil.rmtree('Temp', ignore_errors=True)
+            os.remove(file_name)
         gc.collect()
 
     @Dataset.measure_execution_time
@@ -112,11 +103,11 @@ class LustratedPersonsRegister(Dataset):
         lustrated_col = self.db['Lustrated']
         documents_count = lustrated_col.count_documents({})
         lustrated_register_service_json = {
-            '_id': 6,
-            'Description': 'Єдиний державний реєстр осіб, щодо яких застосовано положення Закону України «Про очищення влади»',
-            'DocumentsCount': documents_count,
-            'CreatedDate': str(created_date),
-            'LastModifiedDate': str(last_modified_date)
+                '_id': 6,
+                'Description': 'Єдиний державний реєстр осіб, щодо яких застосовано положення Закону України «Про очищення влади»',
+                'DocumentsCount': documents_count,
+                'CreatedDate': str(created_date),
+                'LastModifiedDate': str(last_modified_date)
         }
         self.service_col.insert_one(lustrated_register_service_json)
 
@@ -126,9 +117,9 @@ class LustratedPersonsRegister(Dataset):
         lustrated_col = self.db['Lustrated']
         documents_count = lustrated_col.count_documents({})
         self.service_col.update_one(
-            {'_id': 6},
-            {'$set': {'LastModifiedDate': str(last_modified_date),
-                      'DocumentsCount': documents_count}}
+                {'_id': 6},
+                {'$set': {'LastModifiedDate': str(last_modified_date),
+                          'DocumentsCount': documents_count}}
         )
 
     @Dataset.measure_execution_time

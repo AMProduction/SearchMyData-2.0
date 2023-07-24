@@ -77,7 +77,7 @@ class DebtorsRegister(Dataset):
                         # save to the collection
                         debtors_col.insert_one(row)
                     except PyMongoError:
-                        logging.error('Error during saving Debtors Register into Database')
+                        logging.error(f'Error during saving {row} into Database')
             logging.info('Debtors dataset was saved into the database')
         finally:
             # delete temp files
