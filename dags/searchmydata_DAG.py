@@ -20,17 +20,17 @@ def searchmydata_etl():
     start = EmptyOperator(task_id="start")
     stop = EmptyOperator(task_id="stop")
 
-    # @task()
-    # def extract_missing_persons_register():
-    #     from modules.MissingPersonsRegister import MissingPersonsRegister
-    #     missing_persons = MissingPersonsRegister(connection_string)
-    #     missing_persons.setup_dataset()
-    #
-    # @task()
-    # def extract_wanted_persons_register():
-    #     from modules.WantedPersonsRegister import WantedPersonsRegister
-    #     wanted_persons = WantedPersonsRegister(connection_string)
-    #     wanted_persons.setup_dataset()
+    @task()
+    def extract_missing_persons_register():
+        from modules.MissingPersonsRegister import MissingPersonsRegister
+        missing_persons = MissingPersonsRegister(connection_string)
+        missing_persons.setup_dataset()
+
+    @task()
+    def extract_wanted_persons_register():
+        from modules.WantedPersonsRegister import WantedPersonsRegister
+        wanted_persons = WantedPersonsRegister(connection_string)
+        wanted_persons.setup_dataset()
 
     @task()
     def extract_debtors_register():
@@ -38,14 +38,14 @@ def searchmydata_etl():
         debtors = DebtorsRegister(connection_string)
         debtors.setup_dataset()
 
-    # @task()
-    # def extract_lustrated_persons_register():
-    #     from modules.LustratedPersonsRegister import LustratedPersonsRegister
-    #     lustrated = LustratedPersonsRegister(connection_string)
-    #     lustrated.setup_dataset()
+    @task()
+    def extract_lustrated_persons_register():
+        from modules.LustratedPersonsRegister import LustratedPersonsRegister
+        lustrated = LustratedPersonsRegister(connection_string)
+        lustrated.setup_dataset()
 
-    # start >> [extract_missing_persons_register(), extract_wanted_persons_register(), extract_lustrated_persons_register(), extract_debtors_register()] >> stop
-    start >> [extract_debtors_register()] >> stop
+    start >> [extract_missing_persons_register(), extract_wanted_persons_register(),
+              extract_lustrated_persons_register(), extract_debtors_register()] >> stop
 
 
 searchmydata_etl()
