@@ -53,6 +53,7 @@ class LustratedPersonsRegister(Dataset):
             logging.error('Error during LustratedPersonsRegister ZIP receiving occurred')
         else:
             logging.info('A LustratedPersonsRegister dataset received')
+            lustrated_list = []
             with zipfile.ZipFile(BytesIO(lustrated_dataset_zip), 'r') as zip:
                 for xml_file in zip.namelist():
                     logging.warning(f'File in ZIP: {xml_file}')
@@ -71,12 +72,13 @@ class LustratedPersonsRegister(Dataset):
                                     'judgment_composition': judgment_composition,
                                     'period': period
                             }
-                            try:
-                                # save to the collection
-                                lustrated_col.insert_one(lustrated_json)
-                            except PyMongoError:
-                                logging.error(f'Error during saving {lustrated_json} into Database')
-                        logging.info('Lustrated Persons dataset was saved into the database')
+                            lustrated_list.append(lustrated_json)
+            try:
+                # save to the collection
+                lustrated_col.insert_many(lustrated_list, ordered=False)
+            except PyMongoError as e:
+                logging.error(f'Error during saving into Database: {e}')
+            logging.info('Lustrated Persons dataset was saved into the database')
         gc.collect()
 
     @Dataset.measure_execution_time

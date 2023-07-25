@@ -62,6 +62,7 @@ class DebtorsRegister(Dataset):
                         for row in columns_reader:
                             columns = row[0].split(";")
                             break
+            debtors_list = []
             with zipfile.ZipFile(BytesIO(debtors_dataset_zip), 'r') as zip:
                 for csv_file in zip.namelist():
                     with zip.open(csv_file, "r") as csvfile:
@@ -70,11 +71,13 @@ class DebtorsRegister(Dataset):
                         # skip the header
                         next(datareader)
                         for row in datareader:
-                            try:
-                                # save to the collection
-                                debtors_col.insert_one(row)
-                            except PyMongoError:
-                                logging.error(f'Error during saving {row} into Database')
+                            debtors_list.append(dict(row))
+            print(f"-----{len(debtors_list)}-------")
+            try:
+                # save to the collection
+                debtors_col.insert_many(debtors_list, ordered=False)
+            except PyMongoError:
+                logging.error(f'Error during saving into Database')
             logging.info('Debtors dataset was saved into the database')
         gc.collect()
 
