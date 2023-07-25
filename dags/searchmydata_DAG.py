@@ -32,11 +32,11 @@ def searchmydata_etl():
         wanted_persons = WantedPersonsRegister(connection_string)
         wanted_persons.setup_dataset()
 
-    # @task()
-    # def extract_debtors_register():
-    #     from modules.DebtorsRegister import DebtorsRegister
-    #     debtors = DebtorsRegister(connection_string)
-    #     debtors.setup_dataset()
+    @task()
+    def extract_debtors_register():
+        from modules.DebtorsRegister import DebtorsRegister
+        debtors = DebtorsRegister(connection_string)
+        debtors.setup_dataset()
 
     @task()
     def extract_lustrated_persons_register():
@@ -44,10 +44,11 @@ def searchmydata_etl():
         lustrated = LustratedPersonsRegister(connection_string)
         lustrated.setup_dataset()
 
-    # start >> [extract_missing_persons_register(), extract_wanted_persons_register(),
-    #           extract_lustrated_persons_register(), extract_debtors_register()] >> stop
     start >> [extract_missing_persons_register(), extract_wanted_persons_register(),
-              extract_lustrated_persons_register()] >> stop
+              extract_lustrated_persons_register(), extract_debtors_register()] >> stop
+    # start >> [extract_missing_persons_register(), extract_wanted_persons_register(),
+    #           extract_lustrated_persons_register()] >> stop
+    # start >> [extract_debtors_register()] >> stop
 
 
 searchmydata_etl()

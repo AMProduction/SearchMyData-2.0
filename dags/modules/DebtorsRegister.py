@@ -4,10 +4,9 @@ import csv
 import gc
 import json
 import logging
-import os
 import zipfile
 from datetime import datetime
-from io import BytesIO
+from io import BytesIO, TextIOWrapper
 
 import requests
 from pymongo.errors import PyMongoError
@@ -54,34 +53,29 @@ class DebtorsRegister(Dataset):
             logging.error('Error during DebtorsRegisterZIP receiving occured')
         else:
             logging.info('A DebtorsRegister dataset received')
-            # get lists of file
-            debtors_zip = zipfile.ZipFile(BytesIO(debtors_dataset_zip), 'r')
-            # go inside ZIP
-            for csvFile in debtors_zip.namelist():
-                logging.warning('File in ZIP: ' + str(csvFile))
-                debtors_csv_file_name = str(csvFile)
-            debtors_zip.extractall()
-            debtors_zip.close()
             # get the columns names
-            with open(debtors_csv_file_name, "r", encoding='windows-1251') as csvfile:
-                columns_reader = csv.reader(csvfile)
-                for row in columns_reader:
-                    columns = row[0].split(";")
-                    break
-            with open(debtors_csv_file_name, "r", encoding='windows-1251') as csvfile:
-                datareader = csv.DictReader(csvfile, fieldnames=columns)
-                # skip the header
-                next(datareader)
-                for row in datareader:
-                    try:
-                        # save to the collection
-                        debtors_col.insert_one(row)
-                    except PyMongoError:
-                        logging.error(f'Error during saving {row} into Database')
+            with zipfile.ZipFile(BytesIO(debtors_dataset_zip), 'r') as zip:
+                for csv_file in zip.namelist():
+                    logging.warning(f'File in ZIP: {csv_file}')
+                    with zip.open(csv_file, "r") as csvfile:
+                        columns_reader = csv.reader(TextIOWrapper(csvfile, newline='', encoding='windows-1251'))
+                        for row in columns_reader:
+                            columns = row[0].split(";")
+                            break
+            with zipfile.ZipFile(BytesIO(debtors_dataset_zip), 'r') as zip:
+                for csv_file in zip.namelist():
+                    with zip.open(csv_file, "r") as csvfile:
+                        datareader = csv.DictReader(TextIOWrapper(csvfile, newline='', encoding='windows-1251'),
+                                                    fieldnames=columns)
+                        # skip the header
+                        next(datareader)
+                        for row in datareader:
+                            try:
+                                # save to the collection
+                                debtors_col.insert_one(row)
+                            except PyMongoError:
+                                logging.error(f'Error during saving {row} into Database')
             logging.info('Debtors dataset was saved into the database')
-        finally:
-            # delete temp files
-            os.remove(debtors_csv_file_name)
         gc.collect()
 
     @Dataset.measure_execution_time
