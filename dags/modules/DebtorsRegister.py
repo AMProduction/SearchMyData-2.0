@@ -15,8 +15,34 @@ from .dataset import Dataset
 
 
 class DebtorsRegister(Dataset):
+
     def __init__(self, connection_string):
         super().__init__(connection_string)
+
+    @Dataset.measure_execution_time
+    def setup_dataset(self):
+        self.__delete_collection_index()
+        self.__clear_collection()
+        __debtors_dataset_zip_url = self.__get_dataset()
+        self.__save_dataset(__debtors_dataset_zip_url)
+        self.__update_metadata()
+        self.__create_collection_index()
+
+    @Dataset.measure_execution_time
+    def __delete_collection_index(self):
+        if self.is_collection_exists('Debtors'):
+            debtors_col = self.db['Debtors']
+            if 'full_text' in debtors_col.index_information():
+                debtors_col.drop_index('full_text')
+                logging.warning('Debtors Text index deleted')
+
+    @Dataset.measure_execution_time
+    def __clear_collection(self):
+        if self.is_collection_exists('Debtors'):
+            debtors_col = self.db['Debtors']
+            count_deleted_documents = debtors_col.delete_many({})
+            logging.warning(f'{count_deleted_documents.deleted_count} documents deleted. The debtors '
+                            f'collection is empty.')
 
     @Dataset.measure_execution_time
     def __get_dataset(self):
@@ -62,7 +88,6 @@ class DebtorsRegister(Dataset):
                         for row in columns_reader:
                             columns = row[0].split(";")
                             break
-            debtors_list = []
             with zipfile.ZipFile(BytesIO(debtors_dataset_zip), 'r') as zip:
                 for csv_file in zip.namelist():
                     with zip.open(csv_file, "r") as csvfile:
@@ -71,23 +96,35 @@ class DebtorsRegister(Dataset):
                         # skip the header
                         next(datareader)
                         for row in datareader:
-                            debtors_list.append(dict(row))
-            print(f"-----{len(debtors_list)}-------")
-            try:
-                # save to the collection
-                debtors_col.insert_many(debtors_list, ordered=False)
-            except PyMongoError:
-                logging.error(f'Error during saving into Database')
+                            try:
+                                # save to the collection
+                                debtors_col.insert_one(row)
+                            except PyMongoError:
+                                logging.error(f'Error during saving {row} into Database')
             logging.info('Debtors dataset was saved into the database')
         gc.collect()
 
     @Dataset.measure_execution_time
-    def __clear_collection(self):
-        if self.is_collection_exists('Debtors'):
-            debtors_col = self.db['Debtors']
-            count_deleted_documents = debtors_col.delete_many({})
-            logging.warning(f'{count_deleted_documents.deleted_count} documents deleted. The wanted persons '
-                            f'collection is empty.')
+    def __update_metadata(self):
+        # update or create DebtorsRegisterServiceJson
+        if (self.is_collection_exists('ServiceCollection')) and (
+                self.service_col.count_documents({'_id': 3}, limit=1) != 0):
+            self.__update_service_json()
+            logging.info('DebtorsRegisterServiceJson updated')
+        else:
+            self.__create_service_json()
+            logging.info('DebtorsRegisterServiceJson created')
+
+    @Dataset.measure_execution_time
+    def __update_service_json(self):
+        last_modified_date = datetime.now()
+        debtors_col = self.db['Debtors']
+        documents_count = debtors_col.count_documents({})
+        self.service_col.update_one(
+                {'_id': 3},
+                {'$set': {'LastModifiedDate': str(last_modified_date),
+                          'DocumentsCount': documents_count}}
+        )
 
     @Dataset.measure_execution_time
     def __create_service_json(self):
@@ -103,36 +140,6 @@ class DebtorsRegister(Dataset):
                 'LastModifiedDate': str(last_modified_date)
         }
         self.service_col.insert_one(debtors_register_service_json)
-
-    @Dataset.measure_execution_time
-    def __update_service_json(self):
-        last_modified_date = datetime.now()
-        debtors_col = self.db['Debtors']
-        documents_count = debtors_col.count_documents({})
-        self.service_col.update_one(
-                {'_id': 3},
-                {'$set': {'LastModifiedDate': str(last_modified_date),
-                          'DocumentsCount': documents_count}}
-        )
-
-    @Dataset.measure_execution_time
-    def __update_metadata(self):
-        # update or create DebtorsRegisterServiceJson
-        if (self.is_collection_exists('ServiceCollection')) and (
-                self.service_col.count_documents({'_id': 3}, limit=1) != 0):
-            self.__update_service_json()
-            logging.info('DebtorsRegisterServiceJson updated')
-        else:
-            self.__create_service_json()
-            logging.info('DebtorsRegisterServiceJson created')
-
-    @Dataset.measure_execution_time
-    def __delete_collection_index(self):
-        if self.is_collection_exists('Debtors'):
-            debtors_col = self.db['Debtors']
-            if 'full_text' in debtors_col.index_information():
-                debtors_col.drop_index('full_text')
-                logging.warning('Debtors Text index deleted')
 
     @Dataset.measure_execution_time
     def __create_collection_index(self):
@@ -158,12 +165,3 @@ class DebtorsRegister(Dataset):
                     .sort([('score', {'$meta': 'textScore'})]).allow_disk_use(True)
         gc.collect()
         return final_result
-
-    @Dataset.measure_execution_time
-    def setup_dataset(self):
-        self.__delete_collection_index()
-        self.__clear_collection()
-        __debtors_dataset_zip_url = self.__get_dataset()
-        self.__save_dataset(__debtors_dataset_zip_url)
-        self.__update_metadata()
-        self.__create_collection_index()

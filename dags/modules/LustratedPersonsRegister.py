@@ -19,6 +19,31 @@ class LustratedPersonsRegister(Dataset):
         super().__init__(connection_string)
 
     @Dataset.measure_execution_time
+    def setup_dataset(self):
+        self.__delete_collection_index()
+        self.__clear_collection()
+        __lustrated_dataset_zip_url = self.__get_dataset()
+        self.__save_dataset(__lustrated_dataset_zip_url)
+        self.__update_metadata()
+        self.__create_collection_index()
+
+    @Dataset.measure_execution_time
+    def __delete_collection_index(self):
+        if self.is_collection_exists('Lustrated'):
+            lustrated_col = self.db['Lustrated']
+            if 'full_text' in lustrated_col.index_information():
+                lustrated_col.drop_index('full_text')
+                logging.warning('Lustrated Text index deleted')
+
+    @Dataset.measure_execution_time
+    def __clear_collection(self):
+        if self.is_collection_exists('Lustrated'):
+            lustrated_col = self.db['Lustrated']
+            count_deleted_documents = lustrated_col.delete_many({})
+            logging.warning(f'{count_deleted_documents.deleted_count} documents deleted. The Lustrated Persons '
+                            f'collection is empty.')
+
+    @Dataset.measure_execution_time
     def __get_dataset(self):
         try:
             general_dataset = requests.get(
@@ -82,12 +107,26 @@ class LustratedPersonsRegister(Dataset):
         gc.collect()
 
     @Dataset.measure_execution_time
-    def __clear_collection(self):
-        if self.is_collection_exists('Lustrated'):
-            lustrated_col = self.db['Lustrated']
-            count_deleted_documents = lustrated_col.delete_many({})
-            logging.warning(f'{count_deleted_documents.deleted_count} documents deleted. The Lustrated Persons '
-                            f'collection is empty.')
+    def __update_metadata(self):
+        # update or create LustratedPersonsRegisterServiceJson
+        if (self.is_collection_exists('ServiceCollection')) and (
+                self.service_col.count_documents({'_id': 6}, limit=1) != 0):
+            self.__update_service_json()
+            logging.info('LustratedPersonsRegisterServiceJson updated')
+        else:
+            self.__create_service_json()
+            logging.info('LustratedPersonsRegisterServiceJson created')
+
+    @Dataset.measure_execution_time
+    def __update_service_json(self):
+        last_modified_date = datetime.now()
+        lustrated_col = self.db['Lustrated']
+        documents_count = lustrated_col.count_documents({})
+        self.service_col.update_one(
+                {'_id': 6},
+                {'$set': {'LastModifiedDate': str(last_modified_date),
+                          'DocumentsCount': documents_count}}
+        )
 
     @Dataset.measure_execution_time
     def __create_service_json(self):
@@ -103,36 +142,6 @@ class LustratedPersonsRegister(Dataset):
                 'LastModifiedDate': str(last_modified_date)
         }
         self.service_col.insert_one(lustrated_register_service_json)
-
-    @Dataset.measure_execution_time
-    def __update_service_json(self):
-        last_modified_date = datetime.now()
-        lustrated_col = self.db['Lustrated']
-        documents_count = lustrated_col.count_documents({})
-        self.service_col.update_one(
-                {'_id': 6},
-                {'$set': {'LastModifiedDate': str(last_modified_date),
-                          'DocumentsCount': documents_count}}
-        )
-
-    @Dataset.measure_execution_time
-    def __update_metadata(self):
-        # update or create LustratedPersonsRegisterServiceJson
-        if (self.is_collection_exists('ServiceCollection')) and (
-                self.service_col.count_documents({'_id': 6}, limit=1) != 0):
-            self.__update_service_json()
-            logging.info('LustratedPersonsRegisterServiceJson updated')
-        else:
-            self.__create_service_json()
-            logging.info('LustratedPersonsRegisterServiceJson created')
-
-    @Dataset.measure_execution_time
-    def __delete_collection_index(self):
-        if self.is_collection_exists('Lustrated'):
-            lustrated_col = self.db['Lustrated']
-            if 'full_text' in lustrated_col.index_information():
-                lustrated_col.drop_index('full_text')
-                logging.warning('Lustrated Text index deleted')
 
     @Dataset.measure_execution_time
     def __create_collection_index(self):
@@ -159,12 +168,3 @@ class LustratedPersonsRegister(Dataset):
                     .sort([('score', {'$meta': 'textScore'})]).allow_disk_use(True)
         gc.collect()
         return final_result
-
-    @Dataset.measure_execution_time
-    def setup_dataset(self):
-        self.__delete_collection_index()
-        self.__clear_collection()
-        __lustrated_dataset_zip_url = self.__get_dataset()
-        self.__save_dataset(__lustrated_dataset_zip_url)
-        self.__update_metadata()
-        self.__create_collection_index()

@@ -1,10 +1,8 @@
 #  Copyright (c) 2023 Andrii Malchyk, All rights reserved.
 
-import json
 import logging
 from datetime import datetime
 from functools import wraps
-from pathlib import Path
 
 import pymongo
 from pymongo.errors import ServerSelectionTimeoutError
@@ -58,6 +56,21 @@ class Dataset:
             logging.warning('Connected to DB')
             self.service_col = self.db['ServiceCollection']
 
+    def setup_dataset(self):
+        """A sequence of class methods to setup a dataset
+        """
+        pass
+
+    def __delete_collection_index(self):
+        """Drop a database full-text search index
+        """
+        pass
+
+    def __clear_collection(self):
+        """Purge the collection
+        """
+        pass
+
     def __get_dataset(self):
         """Get the link to the dataset.
         Return the link to the dataset's source file
@@ -70,13 +83,8 @@ class Dataset:
         """
         pass
 
-    def __clear_collection(self):
-        """Purge the collection
-        """
-        pass
-
-    def __create_service_json(self):
-        """Create and save a JSON with service information about a dataset
+    def __update_metadata(self):
+        """Call __create_service_json() if a dataset is first time saved. Or call __update_service_json() if a dataset refreshed
         """
         pass
 
@@ -85,13 +93,8 @@ class Dataset:
         """
         pass
 
-    def __update_metadata(self):
-        """Call __create_service_json() if a dataset is first time saved. Or call __update_service_json() if a dataset refreshed
-        """
-        pass
-
-    def __delete_collection_index(self):
-        """Drop a database full-text search index
+    def __create_service_json(self):
+        """Create and save a JSON with service information about a dataset
         """
         pass
 
@@ -102,11 +105,6 @@ class Dataset:
 
     def search_into_collection(self, query_string):
         """Search, show and save search results
-        """
-        pass
-
-    def setup_dataset(self):
-        """A sequence of class methods to setup a dataset
         """
         pass
 
@@ -122,7 +120,7 @@ class Dataset:
             finally:
                 end_time = datetime.now()
                 logging.info(
-                    f'Total execution time {args[0].__class__.__name__}.{func.__name__}: {end_time - start_time}')
+                        f'Total execution time {args[0].__class__.__name__}.{func.__name__}: {end_time - start_time}')
 
         return log_time
 

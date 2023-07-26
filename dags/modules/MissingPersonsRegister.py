@@ -16,10 +16,35 @@ class MissingPersonsRegister(Dataset):
         super().__init__(connection_string)
 
     @Dataset.measure_execution_time
+    def setup_dataset(self):
+        self.__delete_collection_index()
+        self.__clear_collection()
+        __dataset = self.__get_dataset()
+        self.__save_dataset(__dataset)
+        self.__update_metadata()
+        self.__create_collection_index()
+
+    @Dataset.measure_execution_time
+    def __delete_collection_index(self):
+        if self.is_collection_exists('MissingPersons'):
+            missing_persons_col = self.db['MissingPersons']
+            if 'full_text' in missing_persons_col.index_information():
+                missing_persons_col.drop_index('full_text')
+                logging.warning('Missing persons Text index deleted')
+
+    @Dataset.measure_execution_time
+    def __clear_collection(self):
+        if self.is_collection_exists('MissingPersons'):
+            missing_persons_col = self.db['MissingPersons']
+            count_deleted_documents = missing_persons_col.delete_many({})
+            logging.warning(f'{count_deleted_documents.deleted_count} documents deleted. The missing persons '
+                            f'collection is empty.')
+
+    @Dataset.measure_execution_time
     def __get_dataset(self):
         try:
             general_dataset = requests.get(
-                'https://data.gov.ua/api/3/action/package_show?id=470196d3-4e7a-46b0-8c0c-883b74ac65f0').text
+                    'https://data.gov.ua/api/3/action/package_show?id=470196d3-4e7a-46b0-8c0c-883b74ac65f0').text
         except ConnectionError:
             logging.error('Error during general MissingPersons dataset JSON receiving occured')
         else:
@@ -30,7 +55,7 @@ class MissingPersonsRegister(Dataset):
         try:
             # get resources JSON id
             missing_persons_general_dataset_id_json = requests.get(
-                'https://data.gov.ua/api/3/action/resource_show?id=' + missing_persons_general_dataset_id).text
+                    'https://data.gov.ua/api/3/action/resource_show?id=' + missing_persons_general_dataset_id).text
         except ConnectionError:
             logging.error('Error during MissingPersons resources JSON id receiving occured')
         else:
@@ -60,40 +85,6 @@ class MissingPersonsRegister(Dataset):
         gc.collect()
 
     @Dataset.measure_execution_time
-    def __clear_collection(self):
-        if self.is_collection_exists('MissingPersons'):
-            missing_persons_col = self.db['MissingPersons']
-            count_deleted_documents = missing_persons_col.delete_many({})
-            logging.warning(f'{count_deleted_documents.deleted_count} documents deleted. The missing persons '
-                            f'collection is empty.')
-
-    @Dataset.measure_execution_time
-    def __create_service_json(self):
-        created_date = datetime.now()
-        last_modified_date = datetime.now()
-        missing_persons_col = self.db['MissingPersons']
-        documents_count = missing_persons_col.count_documents({})
-        missing_persons_register_service_json = {
-            '_id': 1,
-            'Description': 'Інформація про безвісно зниклих громадян',
-            'DocumentsCount': documents_count,
-            'CreatedDate': str(created_date),
-            'LastModifiedDate': str(last_modified_date)
-        }
-        self.service_col.insert_one(missing_persons_register_service_json)
-
-    @Dataset.measure_execution_time
-    def __update_service_json(self):
-        last_modified_date = datetime.now()
-        missing_persons_col = self.db['MissingPersons']
-        documents_count = missing_persons_col.count_documents({})
-        self.service_col.update_one(
-            {'_id': 1},
-            {'$set': {'LastModifiedDate': str(last_modified_date),
-                      'DocumentsCount': documents_count}}
-        )
-
-    @Dataset.measure_execution_time
     def __update_metadata(self):
         # update or create MissingPersonsRegisterServiceJson
         if (self.is_collection_exists('ServiceCollection')) and (
@@ -105,18 +96,36 @@ class MissingPersonsRegister(Dataset):
             logging.info('MissingPersonsRegisterServiceJson created')
 
     @Dataset.measure_execution_time
-    def __delete_collection_index(self):
-        if self.is_collection_exists('MissingPersons'):
-            missing_persons_col = self.db['MissingPersons']
-            if 'full_text' in missing_persons_col.index_information():
-                missing_persons_col.drop_index('full_text')
-                logging.warning('Missing persons Text index deleted')
+    def __update_service_json(self):
+        last_modified_date = datetime.now()
+        missing_persons_col = self.db['MissingPersons']
+        documents_count = missing_persons_col.count_documents({})
+        self.service_col.update_one(
+                {'_id': 1},
+                {'$set': {'LastModifiedDate': str(last_modified_date),
+                          'DocumentsCount': documents_count}}
+        )
+
+    @Dataset.measure_execution_time
+    def __create_service_json(self):
+        created_date = datetime.now()
+        last_modified_date = datetime.now()
+        missing_persons_col = self.db['MissingPersons']
+        documents_count = missing_persons_col.count_documents({})
+        missing_persons_register_service_json = {
+                '_id': 1,
+                'Description': 'Інформація про безвісно зниклих громадян',
+                'DocumentsCount': documents_count,
+                'CreatedDate': str(created_date),
+                'LastModifiedDate': str(last_modified_date)
+        }
+        self.service_col.insert_one(missing_persons_register_service_json)
 
     @Dataset.measure_execution_time
     def __create_collection_index(self):
         missing_persons_col = self.db['MissingPersons']
         missing_persons_col.create_index(
-            [('FIRST_NAME_U', 'text'), ('LAST_NAME_U', 'text'), ('MIDDLE_NAME_U', 'text')], name='full_text')
+                [('FIRST_NAME_U', 'text'), ('LAST_NAME_U', 'text'), ('MIDDLE_NAME_U', 'text')], name='full_text')
         logging.info('Missing persons Text Index created')
 
     @Dataset.measure_execution_time
@@ -138,12 +147,3 @@ class MissingPersonsRegister(Dataset):
                     .sort([('score', {'$meta': 'textScore'})]).allow_disk_use(True)
         gc.collect()
         return final_result
-
-    @Dataset.measure_execution_time
-    def setup_dataset(self):
-        self.__delete_collection_index()
-        self.__clear_collection()
-        __dataset = self.__get_dataset()
-        self.__save_dataset(__dataset)
-        self.__update_metadata()
-        self.__create_collection_index()
