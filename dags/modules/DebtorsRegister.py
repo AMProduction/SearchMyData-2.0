@@ -11,15 +11,14 @@ from io import BytesIO, TextIOWrapper
 import requests
 from pymongo.errors import PyMongoError
 
-from .dataset import Dataset
+from .dataset import Dataset, measure_execution_time
 
 
 class DebtorsRegister(Dataset):
+    def __init__(self, connection_string, package_base_url, resource_base_url, package_resource_id):
+        super().__init__(connection_string, package_base_url, resource_base_url, package_resource_id)
 
-    def __init__(self, connection_string):
-        super().__init__(connection_string)
-
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def setup_dataset(self):
         self.__delete_collection_index()
         self.__clear_collection()
@@ -28,7 +27,7 @@ class DebtorsRegister(Dataset):
         self.__update_metadata()
         self.__create_collection_index()
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def __delete_collection_index(self):
         if self.is_collection_exists('Debtors'):
             debtors_col = self.db['Debtors']
@@ -36,7 +35,7 @@ class DebtorsRegister(Dataset):
                 debtors_col.drop_index('full_text')
                 logging.warning('Debtors Text index deleted')
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def __clear_collection(self):
         if self.is_collection_exists('Debtors'):
             debtors_col = self.db['Debtors']
@@ -44,13 +43,12 @@ class DebtorsRegister(Dataset):
             logging.warning(f'{count_deleted_documents.deleted_count} documents deleted. The debtors '
                             f'collection is empty.')
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def __get_dataset(self):
         try:
-            general_dataset = requests.get(
-                    'https://data.gov.ua/api/3/action/package_show?id=506734bf-2480-448c-a2b4-90b6d06df11e').text
-        except ConnectionError:
-            logging.error('Error during general DebtorsRegister dataset JSON receiving occured')
+            general_dataset = requests.get(self.package_base_url + self.package_resource_id).text
+        except ConnectionError as e:
+            logging.error(f'Error during general DebtorsRegister dataset JSON receiving occurred: {e}')
         else:
             general_dataset_json = json.loads(general_dataset)
             logging.info('A general DebtorsRegister dataset JSON received')
@@ -58,10 +56,9 @@ class DebtorsRegister(Dataset):
         debtors_general_dataset_id = general_dataset_json['result']['resources'][0]['id']
         try:
             # get resources JSON id
-            debtors_general_dataset_id_json = requests.get(
-                    'https://data.gov.ua/api/3/action/resource_show?id=' + debtors_general_dataset_id).text
-        except ConnectionError:
-            logging.error('Error during DebtorsRegister resources JSON id receiving occured')
+            debtors_general_dataset_id_json = requests.get(self.resource_base_url + debtors_general_dataset_id).text
+        except ConnectionError as e:
+            logging.error(f'Error during DebtorsRegister resources JSON id receiving occurred: {e}')
         else:
             debtors_general_dataset_json = json.loads(debtors_general_dataset_id_json)
             logging.info('A DebtorsRegister resources JSON id received')
@@ -69,14 +66,14 @@ class DebtorsRegister(Dataset):
         debtors_dataset_zip_url = debtors_general_dataset_json['result']['url']
         return debtors_dataset_zip_url
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def __save_dataset(self, zip_url):
         debtors_col = self.db['Debtors']
         try:
             # get ZIP file
             debtors_dataset_zip = requests.get(zip_url).content
-        except OSError:
-            logging.error('Error during DebtorsRegisterZIP receiving occured')
+        except OSError as e:
+            logging.error(f'Error during DebtorsRegisterZIP receiving occurred: {e}')
         else:
             logging.info('A DebtorsRegister dataset received')
             # get the columns names
@@ -104,7 +101,7 @@ class DebtorsRegister(Dataset):
             logging.info('Debtors dataset was saved into the database')
         gc.collect()
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def __update_metadata(self):
         # update or create DebtorsRegisterServiceJson
         if (self.is_collection_exists('ServiceCollection')) and (
@@ -115,7 +112,7 @@ class DebtorsRegister(Dataset):
             self.__create_service_json()
             logging.info('DebtorsRegisterServiceJson created')
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def __update_service_json(self):
         last_modified_date = datetime.now()
         debtors_col = self.db['Debtors']
@@ -126,7 +123,7 @@ class DebtorsRegister(Dataset):
                           'DocumentsCount': documents_count}}
         )
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def __create_service_json(self):
         created_date = datetime.now()
         last_modified_date = datetime.now()
@@ -141,27 +138,8 @@ class DebtorsRegister(Dataset):
         }
         self.service_col.insert_one(debtors_register_service_json)
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def __create_collection_index(self):
         debtors_col = self.db['Debtors']
         debtors_col.create_index([('DEBTOR_NAME', 'text')], name='full_text')
         logging.info('Debtors Text Index created')
-
-    @Dataset.measure_execution_time
-    def search_into_collection(self, query_string):
-        debtors_col = self.db['Debtors']
-        final_result = 0
-        try:
-            result_count = debtors_col.count_documents({'$text': {'$search': query_string}})
-        except PyMongoError:
-            logging.error('Error during search into Debtors Register')
-        else:
-            if result_count == 0:
-                logging.warning('The debtors register: No data found')
-                final_result = 0
-            else:
-                logging.warning(f'The debtors register: {result_count} records found')
-                final_result = debtors_col.find({'$text': {'$search': query_string}}, {'score': {'$meta': 'textScore'}}) \
-                    .sort([('score', {'$meta': 'textScore'})]).allow_disk_use(True)
-        gc.collect()
-        return final_result

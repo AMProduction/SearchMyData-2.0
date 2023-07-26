@@ -8,6 +8,23 @@ import pymongo
 from pymongo.errors import ServerSelectionTimeoutError
 
 
+def measure_execution_time(func):
+    """A service function / a decorator to measure up execution time
+    """
+
+    @wraps(func)
+    def log_time(*args, **kwargs):
+        start_time = datetime.now()
+        try:
+            return func(*args, **kwargs)
+        finally:
+            end_time = datetime.now()
+            logging.info(
+                    f'Total execution time {args[0].__class__.__name__}.{func.__name__}: {end_time - start_time}')
+
+    return log_time
+
+
 class Dataset:
     """Base parent class for all datasets
 
@@ -30,8 +47,6 @@ class Dataset:
             Drop a database full-text search index
         create_collection_index():
             Create a database full-text search index
-        search_into_collection():
-            Search, show and save search results
         setup_dataset():
             A sequence of class methods to setup a dataset
         measure_execution_time():
@@ -40,17 +55,19 @@ class Dataset:
             Check if a collection exists. Input parameter - a collection name
     """
 
-    def __init__(self, connection_string: str):
+    def __init__(self, connection_string: str, package_base_url: str, resource_base_url: str, package_resource_id: str):
         self.logger = logging.getLogger(__name__)
+        self.package_base_url = package_base_url
+        self.resource_base_url = resource_base_url
+        self.package_resource_id = package_resource_id
         self.__dbstring = connection_string
         try:
             # Set server Selection Timeout in ms. The default value is 30s.
             maxSevSelDelay = 3
             self.dbserver = pymongo.MongoClient(self.__dbstring, serverSelectionTimeoutMS=maxSevSelDelay)
-            print(self.dbserver)
             self.dbserver.server_info()  # force connection on a request
-        except ServerSelectionTimeoutError:
-            logging.error(f'{self.__class__.__name__}: Connection error')
+        except ServerSelectionTimeoutError as e:
+            logging.error(f'{self.__class__.__name__}: Connection error. {e}')
         else:
             self.db = self.dbserver['searchmydata']
             logging.warning('Connected to DB')
@@ -102,27 +119,6 @@ class Dataset:
         """Create a database full-text search index
         """
         pass
-
-    def search_into_collection(self, query_string):
-        """Search, show and save search results
-        """
-        pass
-
-    def measure_execution_time(func):
-        """A service function / a decorator to measure up execution time
-        """
-
-        @wraps(func)
-        def log_time(*args, **kwargs):
-            start_time = datetime.now()
-            try:
-                return func(*args, **kwargs)
-            finally:
-                end_time = datetime.now()
-                logging.info(
-                        f'Total execution time {args[0].__class__.__name__}.{func.__name__}: {end_time - start_time}')
-
-        return log_time
 
     def is_collection_exists(self, collection_name):
         """Check if a collection exists.

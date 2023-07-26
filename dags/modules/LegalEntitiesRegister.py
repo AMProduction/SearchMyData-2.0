@@ -13,20 +13,35 @@ from io import BytesIO
 import requests
 from pymongo.errors import PyMongoError
 
-from .dataset import Dataset
+from .dataset import Dataset, measure_execution_time
 
 
 class LegalEntitiesRegister(Dataset):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, connection_string, package_base_url, resource_base_url, package_resource_id):
+        super().__init__(connection_string, package_base_url, resource_base_url, package_resource_id)
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
+    def delete_collection_index(self):
+        if self.is_collection_exists('LegalEntities'):
+            legal_entities_col = self.db['LegalEntities']
+            if 'full_text' in legal_entities_col.index_information():
+                legal_entities_col.drop_index('full_text')
+                logging.warning('LegalEntities Text index deleted')
+
+    @measure_execution_time
+    def clear_collection(self):
+        if self.is_collection_exists('LegalEntities'):
+            legal_entities_col = self.db['LegalEntities']
+            count_deleted_documents = legal_entities_col.delete_many({})
+            logging.warning(f'{count_deleted_documents.deleted_count} documents deleted. The legal entities '
+                            f'collection is empty.')
+
+    @measure_execution_time
     def get_dataset(self):
         try:
-            general_dataset = requests.get(
-                'https://data.gov.ua/api/3/action/package_show?id=1c7f3815-3259-45e0-bdf1-64dca07ddc10').text
-        except ConnectionError:
-            logging.error('Error during general EntrepreneursRegister dataset JSON receiving occured')
+            general_dataset = requests.get(self.package_base_url + self.package_resource_id).text
+        except ConnectionError as e:
+            logging.error(f'Error during general EntrepreneursRegister dataset JSON receiving occurred: {e}')
         else:
             general_dataset_json = json.loads(general_dataset)
             logging.info('A general EntrepreneursRegister dataset JSON received')
@@ -35,9 +50,9 @@ class LegalEntitiesRegister(Dataset):
         try:
             # get resources JSON id
             entrepreneurs_general_dataset_id_json = requests.get(
-                'https://data.gov.ua/api/3/action/resource_show?id=' + entrepreneurs_general_dataset_id).text
-        except ConnectionError:
-            logging.error('Error during EntrepreneursRegister resources JSON id receiving occured')
+                    self.resource_base_url + entrepreneurs_general_dataset_id).text
+        except ConnectionError as e:
+            logging.error(f'Error during EntrepreneursRegister resources JSON id receiving occurred: {e}')
         else:
             entrepreneurs_general_dataset_json = json.loads(entrepreneurs_general_dataset_id_json)
             logging.info('A EntrepreneursRegister resources JSON id received')
@@ -45,15 +60,15 @@ class LegalEntitiesRegister(Dataset):
         entrepreneurs_dataset_zip_url = entrepreneurs_general_dataset_json['result']['url']
         return entrepreneurs_dataset_zip_url
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def save_dataset(self, zip_url):
         entrepreneurs_col = self.db['Entrepreneurs']
         legal_entities_col = self.db['LegalEntities']
         try:
             # get ZIP file
             entrepreneurs_dataset_zip = requests.get(zip_url).content
-        except OSError:
-            logging.error('Error during EntrepreneursRegister ZIP receiving occured')
+        except OSError as e:
+            logging.error(f'Error during EntrepreneursRegister ZIP receiving occurred: {e}')
         else:
             logging.info('A EntrepreneursRegister dataset received')
             # get lists of file
@@ -102,21 +117,21 @@ class LegalEntitiesRegister(Dataset):
                                     founders_number += 1
                         stan = record.find('STAN').text
                         legal_entities_json = {
-                            'name': name,
-                            'short_name': short_name,
-                            'edrpou': edrpou,
-                            'address': address,
-                            'kved': kved,
-                            'boss': boss,
-                            'beneficiaries': beneficiaries_dict,
-                            'founders': founders_dict,
-                            'stan': stan
+                                'name': name,
+                                'short_name': short_name,
+                                'edrpou': edrpou,
+                                'address': address,
+                                'kved': kved,
+                                'boss': boss,
+                                'beneficiaries': beneficiaries_dict,
+                                'founders': founders_dict,
+                                'stan': stan
                         }
                         try:
                             # save to the collection
                             legal_entities_col.insert_one(legal_entities_json)
-                        except PyMongoError:
-                            logging.error('Error during saving Legal Entities Register into Database')
+                        except PyMongoError as e:
+                            logging.error(f'Error during saving Legal Entities Register into Database: {e}')
                     logging.info('LegalEntities dataset was saved into the database')
                 if xml_file.find('_FOP_') != -1:
                     # read the entrepreneurs Xml file
@@ -131,57 +146,23 @@ class LegalEntitiesRegister(Dataset):
                         kved = record.find('KVED').text
                         stan = record.find('STAN').text
                         entrepreneurs_json = {
-                            'fio': fio,
-                            'address': address,
-                            'kved': kved,
-                            'stan': stan
+                                'fio': fio,
+                                'address': address,
+                                'kved': kved,
+                                'stan': stan
                         }
                         try:
                             # save to the collection
                             entrepreneurs_col.insert_one(entrepreneurs_json)
-                        except PyMongoError:
-                            logging.error('Error during saving Entrepreneurs Register into Database')
+                        except PyMongoError as e:
+                            logging.error(f'Error during saving Entrepreneurs Register into Database: {e}')
                     logging.info('Entrepreneurs dataset was saved into the database')
         finally:
             # delete temp files
             shutil.rmtree('Temp', ignore_errors=True)
         gc.collect()
 
-    @Dataset.measure_execution_time
-    def clear_collection(self):
-        if self.is_collection_exists('LegalEntities'):
-            legal_entities_col = self.db['LegalEntities']
-            count_deleted_documents = legal_entities_col.delete_many({})
-            logging.warning(f'{count_deleted_documents.deleted_count} documents deleted. The legal entities '
-                            f'collection is empty.')
-
-    @Dataset.measure_execution_time
-    def __create_service_json(self):
-        created_date = datetime.now()
-        last_modified_date = datetime.now()
-        legal_entities_col = self.db['LegalEntities']
-        documents_count = legal_entities_col.count_documents({})
-        legal_entities_register_service_json = {
-            '_id': 4,
-            'Description': 'Єдиний державний реєстр юридичних осіб та громадських формувань',
-            'DocumentsCount': documents_count,
-            'CreatedDate': str(created_date),
-            'LastModifiedDate': str(last_modified_date)
-        }
-        self.service_col.insert_one(legal_entities_register_service_json)
-
-    @Dataset.measure_execution_time
-    def __update_service_json(self):
-        last_modified_date = datetime.now()
-        legal_entities_col = self.db['LegalEntities']
-        documents_count = legal_entities_col.count_documents({})
-        self.service_col.update_one(
-            {'_id': 4},
-            {'$set': {'LastModifiedDate': str(last_modified_date),
-                      'DocumentsCount': documents_count}}
-        )
-
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def update_metadata(self):
         # update or create LegalEntitiesRegisterServiceJson
         if (self.is_collection_exists('ServiceCollection')) and (
@@ -192,37 +173,35 @@ class LegalEntitiesRegister(Dataset):
             self.__create_service_json()
             logging.info('LegalEntitiesRegisterServiceJson created')
 
-    @Dataset.measure_execution_time
-    def delete_collection_index(self):
-        if self.is_collection_exists('LegalEntities'):
-            legal_entities_col = self.db['LegalEntities']
-            if 'full_text' in legal_entities_col.index_information():
-                legal_entities_col.drop_index('full_text')
-                logging.warning('LegalEntities Text index deleted')
+    @measure_execution_time
+    def __update_service_json(self):
+        last_modified_date = datetime.now()
+        legal_entities_col = self.db['LegalEntities']
+        documents_count = legal_entities_col.count_documents({})
+        self.service_col.update_one(
+                {'_id': 4},
+                {'$set': {'LastModifiedDate': str(last_modified_date),
+                          'DocumentsCount': documents_count}}
+        )
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
+    def __create_service_json(self):
+        created_date = datetime.now()
+        last_modified_date = datetime.now()
+        legal_entities_col = self.db['LegalEntities']
+        documents_count = legal_entities_col.count_documents({})
+        legal_entities_register_service_json = {
+                '_id': 4,
+                'Description': 'Єдиний державний реєстр юридичних осіб та громадських формувань',
+                'DocumentsCount': documents_count,
+                'CreatedDate': str(created_date),
+                'LastModifiedDate': str(last_modified_date)
+        }
+        self.service_col.insert_one(legal_entities_register_service_json)
+
+    @measure_execution_time
     def create_collection_index(self):
         legal_entities_col = self.db['LegalEntities']
         legal_entities_col.create_index([('short_name', 'text'), ('edrpou', 'text'), ('boss', 'text'),
                                          ('beneficiaries', 'text'), ('founders', 'text')], name='full_text')
         logging.info('LegalEntities Text Index created')
-
-    @Dataset.measure_execution_time
-    def search_into_collection(self, query_string):
-        legal_entities_col = self.db['LegalEntities']
-        final_result = 0
-        try:
-            result_count = legal_entities_col.count_documents({'$text': {'$search': query_string}})
-        except PyMongoError:
-            logging.error('Error during search into Legal Entities Register')
-        else:
-            if result_count == 0:
-                logging.warning('The legal entities register: No data found')
-                final_result = 0
-            else:
-                logging.warning(f'The legal entities register: {result_count} records found')
-                final_result = legal_entities_col.find({'$text': {'$search': query_string}},
-                                                       {'score': {'$meta': 'textScore'}}) \
-                    .sort([('score', {'$meta': 'textScore'})]).allow_disk_use(True)
-        gc.collect()
-        return final_result

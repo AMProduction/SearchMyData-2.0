@@ -8,14 +8,14 @@ from datetime import datetime
 import requests
 from pymongo.errors import PyMongoError
 
-from .dataset import Dataset
+from .dataset import Dataset, measure_execution_time
 
 
 class WantedPersonsRegister(Dataset):
-    def __init__(self, connection_string):
-        super().__init__(connection_string)
+    def __init__(self, connection_string, package_base_url, resource_base_url, package_resource_id):
+        super().__init__(connection_string, package_base_url, resource_base_url, package_resource_id)
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def setup_dataset(self):
         self.__delete_collection_index()
         self.__clear_collection()
@@ -24,7 +24,7 @@ class WantedPersonsRegister(Dataset):
         self.__update_metadata()
         self.__create_collection_index()
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def __delete_collection_index(self):
         if self.is_collection_exists('WantedPersons'):
             wanted_persons_col = self.db['WantedPersons']
@@ -32,7 +32,7 @@ class WantedPersonsRegister(Dataset):
                 wanted_persons_col.drop_index('full_text')
                 logging.warning('WantedPersons Text index deleted')
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def __clear_collection(self):
         if self.is_collection_exists('WantedPersons'):
             wanted_persons_col = self.db['WantedPersons']
@@ -40,13 +40,12 @@ class WantedPersonsRegister(Dataset):
             logging.warning(f'{count_deleted_documents.deleted_count} documents deleted. The wanted persons '
                             f'collection is empty.')
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def __get_dataset(self):
         try:
-            general_dataset = requests.get(
-                    'https://data.gov.ua/api/3/action/package_show?id=7c51c4a0-104b-4540-a166-e9fc58485c1b').text
-        except ConnectionError:
-            logging.error('Error during general WantedPersons dataset JSON receiving occured')
+            general_dataset = requests.get(self.package_base_url + self.package_resource_id).text
+        except ConnectionError as e:
+            logging.error(f'Error during general WantedPersons dataset JSON receiving occurred: {e}')
         else:
             general_dataset_json = json.loads(general_dataset)
             logging.info('A general WantedPersons dataset JSON received')
@@ -55,9 +54,9 @@ class WantedPersonsRegister(Dataset):
         try:
             # get resources JSON id
             wanted_persons_general_dataset_id_json = requests.get(
-                    'https://data.gov.ua/api/3/action/resource_show?id=' + wanted_persons_general_dataset_id).text
-        except ConnectionError:
-            logging.error('Error during WantedPersons resources JSON id receiving occured')
+                    self.resource_base_url + wanted_persons_general_dataset_id).text
+        except ConnectionError as e:
+            logging.error(f'Error during WantedPersons resources JSON id receiving occurred: {e}')
         else:
             wanted_persons_general_dataset_json = json.loads(wanted_persons_general_dataset_id_json)
             logging.info('A WantedPersons resources JSON id received')
@@ -66,25 +65,25 @@ class WantedPersonsRegister(Dataset):
         try:
             # get dataset
             wanted_persons_dataset_json = requests.get(wanted_persons_dataset_json_url).text
-        except ConnectionError:
-            logging.error('Error during WantedPersons dataset receiving occured')
+        except ConnectionError as e:
+            logging.error(f'Error during WantedPersons dataset receiving occurred: {e}')
         else:
             wanted_persons_dataset = json.loads(wanted_persons_dataset_json)
             logging.info('A WantedPersons dataset received')
         return wanted_persons_dataset
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def __save_dataset(self, json):
         wanted_persons_col = self.db['WantedPersons']
         try:
             wanted_persons_col.insert_many(json)
-        except PyMongoError:
-            logging.error('Error during saving Wanted Persons Register into Database')
+        except PyMongoError as e:
+            logging.error(f'Error during saving Wanted Persons Register into Database: {e}')
         else:
             logging.info('Wanted persons dataset was saved into the database')
         gc.collect()
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def __update_metadata(self):
         # update or create WantedPersonsRegisterServiceJson
         if (self.is_collection_exists('ServiceCollection')) and (
@@ -95,7 +94,7 @@ class WantedPersonsRegister(Dataset):
             self.__create_service_json()
             logging.info('WantedPersonsRegisterServiceJson created')
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def __update_service_json(self):
         last_modified_date = datetime.now()
         wanted_persons_col = self.db['WantedPersons']
@@ -106,7 +105,7 @@ class WantedPersonsRegister(Dataset):
                           'DocumentsCount': documents_count}}
         )
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def __create_service_json(self):
         created_date = datetime.now()
         last_modified_date = datetime.now()
@@ -121,29 +120,9 @@ class WantedPersonsRegister(Dataset):
         }
         self.service_col.insert_one(wanted_persons_register_service_json)
 
-    @Dataset.measure_execution_time
+    @measure_execution_time
     def __create_collection_index(self):
         wanted_persons_col = self.db['WantedPersons']
         wanted_persons_col.create_index(
                 [('FIRST_NAME_U', 'text'), ('LAST_NAME_U', 'text'), ('MIDDLE_NAME_U', 'text')], name='full_text')
         logging.info('WantedPersons Text Index created')
-
-    @Dataset.measure_execution_time
-    def search_into_collection(self, query_string):
-        wanted_persons_col = self.db['WantedPersons']
-        final_result = 0
-        try:
-            result_count = wanted_persons_col.count_documents({'$text': {'$search': query_string}})
-        except PyMongoError:
-            logging.error('Error during search into Wanted Persons Register')
-        else:
-            if result_count == 0:
-                logging.warning('The wanted persons register: No data found')
-                final_result = 0
-            else:
-                logging.warning(f'The wanted persons register: {result_count} records found')
-                final_result = wanted_persons_col.find({'$text': {'$search': query_string}},
-                                                       {'score': {'$meta': 'textScore'}}) \
-                    .sort([('score', {'$meta': 'textScore'})]).allow_disk_use(True)
-        gc.collect()
-        return final_result
