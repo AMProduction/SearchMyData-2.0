@@ -1,9 +1,7 @@
 #  Copyright (c) 2023 Andrii Malchyk, All rights reserved.
 
-import json
 import logging
 from datetime import datetime, timedelta
-from pathlib import Path
 
 import pymongo
 from pymongo.errors import ServerSelectionTimeoutError
@@ -28,8 +26,7 @@ class ServiceTools:
         try:
             # Set server Selection Timeout in ms. The default value is 30s.
             maxSevSelDelay = 3
-            self.__dbserver = pymongo.MongoClient(
-            self.__dbstring, serverSelectionTimeoutMS=maxSevSelDelay)
+            self.__dbserver = pymongo.MongoClient(self.__dbstring, serverSelectionTimeoutMS=maxSevSelDelay)
             self.__dbserver.server_info()  # force connection on a request
         except ServerSelectionTimeoutError:
             logging.error(f'{self.__class__.__name__}: Connection error')
