@@ -1,5 +1,6 @@
-*The application is under migrating to the Flask framework. Not all functionalities are available now.*
+*The application is under migration to the Flask framework. Not all functionalities are available now.*
 # Welcome to the SearchMyData-2.0 App! The web version of [the SearchMyData App](https://github.com/AMProduction/SearchMyData/wiki)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ## Description
 The app gives the possibility to perform a search into the Ukrainian government [Open data portal](https://data.gov.ua/en/) datasets.  
 At this moment (July 2023) integrated [Information on missing citizens](https://data.gov.ua/en/dataset/470196d3-4e7a-46b0-8c0c-883b74ac65f0),
