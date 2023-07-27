@@ -1,9 +1,10 @@
 #  Copyright (c) 2023 Andrii Malchyk, All rights reserved.
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import render_template, request
-from flaskr import app
+
+from flaskr import app, mongo
 
 
 @app.route("/")
@@ -15,11 +16,17 @@ def home():
 
 @app.route('/info')
 def get_collections_info():
-    from .src.ServiceTools import ServiceTools
-    CONNECTION_STRING = os.getenv('CONNECTION_STRING')
-    service_tool = ServiceTools(CONNECTION_STRING)
-    registers_info = service_tool.get_registers_info()
-    expiration = service_tool.check_is_expired()
+    db = mongo[os.getenv('MONGO_INITDB_DATABASE')]
+    service_collection = db['ServiceCollection']
+    registers_info = service_collection.find({},
+                                             {'_id': 1, 'Description': 1, 'DocumentsCount': 1, 'LastModifiedDate': 1}) \
+        .sort([('_id', 1)])
+    expiration = False
+    expired_time = datetime.now() - timedelta(days=2)
+    for record in service_collection.find():
+        last_modified_date = datetime.strptime(record['LastModifiedDate'], '%Y-%m-%d %H:%M:%S.%f')
+        if last_modified_date < expired_time:
+            expiration = True
     return render_template('info.html', result=registers_info, isExpired=expiration, now=datetime.utcnow())
 
 
