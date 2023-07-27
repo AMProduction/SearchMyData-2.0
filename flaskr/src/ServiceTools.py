@@ -21,41 +21,21 @@ class ServiceTools:
             Check if a dataset last updated date is older than 2 days ago
     """
 
-    def __init__(self):
+    def __init__(self, connection_string: str):
         self.logger = logging.getLogger(__name__)
-        self.__configJsonFilePath = Path('config.json')
-        # check if config.json exists
-        if self.__configJsonFilePath.is_file():
-            logging.warning(f'{self.__class__.__name__}: Config.json is found')
-            self.__configJsonFile = open(self.__configJsonFilePath)
-            # try to read json
-            try:
-                self.__configJson = json.loads(self.__configJsonFile.read())
-            except ValueError:
-                logging.error(
-                    f'{self.__class__.__name__}: Config.json format error')
-            # read db connection string
-            try:
-                self.__dbstring = self.__configJson['dbstring']
-            except KeyError:
-                logging.error(
-                    f'{self.__class__.__name__}: "dbstring" key is not found in Config.json')
-            # try to connect
-            try:
-                # Set server Selection Timeout in ms. The default value is 30s.
-                maxSevSelDelay = 3
-                self.__dbserver = pymongo.MongoClient(
-                    self.__dbstring, serverSelectionTimeoutMS=maxSevSelDelay)
-                self.__dbserver.server_info()  # force connection on a request
-            except ServerSelectionTimeoutError:
-                logging.error(f'{self.__class__.__name__}: Connection error')
-            else:
-                self.__db = self.__dbserver["searchmydata"]
-                self.__serviceCol = self.__db['ServiceCollection']
-        # if config.json does not exists
+        self.__dbstring = connection_string
+        # try to connect
+        try:
+            # Set server Selection Timeout in ms. The default value is 30s.
+            maxSevSelDelay = 3
+            self.__dbserver = pymongo.MongoClient(
+            self.__dbstring, serverSelectionTimeoutMS=maxSevSelDelay)
+            self.__dbserver.server_info()  # force connection on a request
+        except ServerSelectionTimeoutError:
+            logging.error(f'{self.__class__.__name__}: Connection error')
         else:
-            logging.error(
-                f'{self.__class__.__name__}: Config.json is not found')
+            self.__db = self.__dbserver["searchmydata"]
+            self.__serviceCol = self.__db['ServiceCollection']
 
     def get_registers_info(self):
         """Show the list of available registers, count of documents, and the last update date

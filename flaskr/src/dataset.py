@@ -10,6 +10,23 @@ import pymongo
 from pymongo.errors import ServerSelectionTimeoutError
 
 
+def measure_execution_time(func):
+    """A service function / a decorator to measure up execution time
+    """
+
+    @wraps(func)
+    def log_time(*args, **kwargs):
+        start_time = datetime.now()
+        try:
+            return func(*args, **kwargs)
+        finally:
+            end_time = datetime.now()
+            logging.info(
+                    f'Total execution time {args[0].__class__.__name__}.{func.__name__}: {end_time - start_time}')
+
+    return log_time
+
+
 class Dataset:
     """Base parent class for all datasets
 
@@ -42,41 +59,21 @@ class Dataset:
             Check if a collection exists. Input parameter - a collection name
     """
 
-    def __init__(self):
+    def __init__(self, connection_string: str):
         self.logger = logging.getLogger(__name__)
-        self.__configJsonFilePath = Path('config.json')
-        # check if config.json exists
-        if self.__configJsonFilePath.is_file():
-            logging.warning(f'{self.__class__.__name__}: Config.json is found')
-            self.__configJsonFile = open(self.__configJsonFilePath)
-            # try to read json
-            try:
-                self.__configJson = json.loads(self.__configJsonFile.read())
-            except ValueError:
-                logging.error(
-                    f'{self.__class__.__name__}: Config.json format error')
-            # read db connection string
-            try:
-                self.__dbstring = self.__configJson['dbstring']
-            except KeyError:
-                logging.error(
-                    f'{self.__class__.__name__}: "dbstring" key is not found in Config.json')
-            # try to connect
-            try:
-                # Set server Selection Timeout in ms. The default value is 30s.
-                maxSevSelDelay = 3
-                self.dbserver = pymongo.MongoClient(self.__dbstring, serverSelectionTimeoutMS=maxSevSelDelay)
-                self.dbserver.server_info()  # force connection on a request
-            except ServerSelectionTimeoutError:
-                logging.error(f'{self.__class__.__name__}: Connection error')
-            else:
-                self.db = self.dbserver['searchmydata']
-                logging.warning('Connected to DB')
-                self.service_col = self.db['ServiceCollection']
-        # if config.json does not exists
+        self.__dbstring = connection_string
+        # try to connect
+        try:
+            # Set server Selection Timeout in ms. The default value is 30s.
+            maxSevSelDelay = 3
+            self.dbserver = pymongo.MongoClient(self.__dbstring, serverSelectionTimeoutMS=maxSevSelDelay)
+            self.dbserver.server_info()  # force connection on a request
+        except ServerSelectionTimeoutError:
+            logging.error(f'{self.__class__.__name__}: Connection error')
         else:
-            logging.error(
-                f'{self.__class__.__name__}: Config.json is not found')
+            self.db = self.dbserver['searchmydata']
+            logging.warning('Connected to DB')
+            self.service_col = self.db['ServiceCollection']
 
     def __get_dataset(self):
         """Get the link to the dataset.
@@ -129,22 +126,6 @@ class Dataset:
         """A sequence of class methods to setup a dataset
         """
         pass
-
-    def measure_execution_time(func):
-        """A service function / a decorator to measure up execution time
-        """
-
-        @wraps(func)
-        def log_time(*args, **kwargs):
-            start_time = datetime.now()
-            try:
-                return func(*args, **kwargs)
-            finally:
-                end_time = datetime.now()
-                logging.info(
-                    f'Total execution time {args[0].__class__.__name__}.{func.__name__}: {end_time - start_time}')
-
-        return log_time
 
     def is_collection_exists(self, collection_name):
         """Check if a collection exists.

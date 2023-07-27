@@ -1,4 +1,6 @@
 #  Copyright (c) 2023 Andrii Malchyk, All rights reserved.
+import os
+
 from flask import render_template, request
 from flaskr import app
 
@@ -13,7 +15,8 @@ def home():
 @app.route('/info')
 def get_collections_info():
     from .src.ServiceTools import ServiceTools
-    service_tool = ServiceTools()
+    CONNECTION_STRING = os.getenv('CONNECTION_STRING')
+    service_tool = ServiceTools(CONNECTION_STRING)
     registers_info = service_tool.get_registers_info()
     expiration = service_tool.check_is_expired()
     return render_template('info.html', result=registers_info, isExpired=expiration)
