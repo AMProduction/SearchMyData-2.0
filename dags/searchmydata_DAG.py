@@ -8,6 +8,7 @@ from airflow.operators.empty import EmptyOperator
 
 
 @dag(dag_id='SearchMyData_ETL',
+     description='The set of ETL tasks to extract different registers data',
      schedule_interval='@daily',
      start_date=pendulum.datetime(2023, 7, 20, tz="UTC"),
      catchup=False,

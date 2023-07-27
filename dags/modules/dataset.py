@@ -49,8 +49,6 @@ class Dataset:
             Create a database full-text search index
         setup_dataset():
             A sequence of class methods to setup a dataset
-        measure_execution_time():
-            A service function / a decorator to measure up execution time
         is_collection_exists():
             Check if a collection exists. Input parameter - a collection name
     """
