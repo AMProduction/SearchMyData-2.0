@@ -94,9 +94,9 @@
                     <th scope="col">LOST DATE</th>
                 </tr>
                 </thead>
-                {% if resultMissingPersons != 0 %}
+                {% if result_MissingPersons != 0 %}
                 <tbody>
-                {% for row in resultMissingPersons %}
+                {% for row in result_MissingPersons %}
                 <tr>
                     <td>{{ row['LAST_NAME_U'] }}</td>
                     <td>{{ row['FIRST_NAME_U'] }}</td>
@@ -107,7 +107,7 @@
                 </tr>
                 {% endfor %}
                 </tbody>
-                {% elif resultMissingPersons == 0 %}
+                {% elif result_MissingPersons == 0 %}
                 <tfoot>
                 <tr>
                     <td class="bi bi-exclamation-triangle-fill" colspan="6"> The missing persons register: No data
@@ -120,7 +120,7 @@
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <button type="button" class="btn btn-secondary bi bi-cloud-download-fill"
                         onclick="saveSearchResultToFile('MissingPersons');"
-                        {% if resultMissingPersons == 0 %} disabled {% endif %}> Save
+                        {% if result_MissingPersons == 0 %} disabled {% endif %}> Save
                 </button>
             </div>
         </div>
@@ -140,9 +140,9 @@
                     <th scope="col">CRIME</th>
                 </tr>
                 </thead>
-                {% if resultWantedPersons != 0 %}
+                {% if result_WantedPersons != 0 %}
                 <tbody>
-                {% for row in resultWantedPersons %}
+                {% for row in result_WantedPersons %}
                 <tr>
                     <td>{{ row['LAST_NAME_U'] }}</td>
                     <td>{{ row['FIRST_NAME_U'] }}</td>
@@ -156,7 +156,7 @@
                 </tr>
                 {% endfor %}
                 </tbody>
-                {% elif resultWantedPersons == 0 %}
+                {% elif result_WantedPersons == 0 %}
                 <tfoot>
                 <tr>
                     <td class="bi bi-exclamation-triangle-fill" colspan="9"> The wanted persons register: No data
@@ -169,7 +169,7 @@
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <button type="button" class="btn btn-secondary bi bi-cloud-download-fill"
                         onclick="saveSearchResultToFile('WantedPersons');"
-                        {% if resultWantedPersons == 0 %} disabled {% endif %}> Save
+                        {% if result_WantedPersons == 0 %} disabled {% endif %}> Save
                 </button>
             </div>
         </div>
@@ -186,20 +186,20 @@
                     <th scope="col">CATEGORY</th>
                 </tr>
                 </thead>
-                {% if resultDebtors != 0 %}
+                {% if result_Debtors != 0 %}
                 <tbody>
-                {% for row in resultDebtors %}
+                {% for row in result_Debtors %}
                 <tr>
                     <td>{{ row['DEBTOR_NAME'] }}</td>
                     <td>{{ row['DEBTOR_CODE'] }}</td>
                     <td>{{ row['PUBLISHER'] }}</td>
-                    <td>{{ row['EMP_ORG'] }}</td>
+                    <td>{{ row['ORG_NAME'] }}</td>
                     <td>{{ row['EMP_FULL_FIO'] }}</td>
                     <td>{{ row['VD_CAT'] }}</td>
                 </tr>
                 {% endfor %}
                 </tbody>
-                {% elif resultDebtors == 0 %}
+                {% elif result_Debtors == 0 %}
                 <tfoot>
                 <tr>
                     <td class="bi bi-exclamation-triangle-fill" colspan="6"> The debtors register: No data found
@@ -211,7 +211,7 @@
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <button type="button" class="btn btn-secondary bi bi-cloud-download-fill"
                         onclick="saveSearchResultToFile('Debtors');"
-                        {% if resultDebtors == 0 %} disabled {% endif %}> Save
+                        {% if result_Debtors == 0 %} disabled {% endif %}> Save
                 </button>
             </div>
         </div>
@@ -312,9 +312,9 @@
                     <th scope="col">PERIOD</th>
                 </tr>
                 </thead>
-                {% if resultLustrated != 0 %}
+                {% if result_Lustrated != 0 %}
                 <tbody>
-                {% for row in resultLustrated %}
+                {% for row in result_Lustrated %}
                 <tr>
                     <td>{{ row['fio'] }}</td>
                     <td>{{ row['job'] }}</td>
@@ -323,7 +323,7 @@
                 </tr>
                 {% endfor %}
                 </tbody>
-                {% elif resultLustrated == 0 %}
+                {% elif result_Lustrated == 0 %}
                 <tfoot>
                 <tr>
                     <td class="bi bi-exclamation-triangle-fill" colspan="4"> The Lustrated Persons register: No data
@@ -336,7 +336,7 @@
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <button type="button" class="btn btn-secondary bi bi-cloud-download-fill"
                         onclick="saveSearchResultToFile('Lustrated');"
-                        {% if resultLustrated == 0 %} disabled {% endif %}> Save
+                        {% if result_Lustrated == 0 %} disabled {% endif %}> Save
                 </button>
             </div>
         </div>
