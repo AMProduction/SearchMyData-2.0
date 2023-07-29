@@ -23,12 +23,12 @@
 
     </style>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 <nav class="navbar sticky-top navbar-expand-sm bg-warning navbar-light">
     <div class="container-fluid">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link bi bi-chevron-double-left" href="/"> Back</a>
+                <a class="nav-link bi bi-chevron-double-left" href="{{ url_for('home') }}"> Back</a>
             </li>
         </ul>
     </div>
@@ -384,8 +384,6 @@
         };
         html2pdf().set(opt).from(element).save();
     }
-
-
 
 </script>
 </body>
