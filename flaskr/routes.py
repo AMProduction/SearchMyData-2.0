@@ -1,6 +1,6 @@
 #  Copyright (c) 2023 Andrii Malchyk, All rights reserved.
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from flask import render_template, request
 

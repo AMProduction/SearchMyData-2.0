@@ -2,12 +2,13 @@
   ~ Copyright (c) 2023 Andrii Malchyk, All rights reserved.
   -->
 <div class="container mt-auto">
-  <footer class="py-1 my-1">
-    <ul class="nav justify-content-center border-bottom pb-0 mb-2">
-      <li class="nav-item"><a href="{{ url_for('home') }}" class="nav-link px-2 text-body-secondary">Home</a></li>
-      <li class="nav-item"><a href="{{ url_for('show_collections_info') }}" class="nav-link px-2 text-body-secondary">Info</a></li>
-      <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary">About</a></li>
-    </ul>
-    <p class="text-center text-body-secondary">© {{ now.year }} AMProduction, Inc</p>
-  </footer>
+    <footer class="py-1 my-1">
+        <ul class="nav justify-content-center border-bottom pb-0 mb-2">
+            <li class="nav-item"><a class="nav-link px-2 text-body-secondary" href="{{ url_for('home') }}">Home</a></li>
+            <li class="nav-item"><a class="nav-link px-2 text-body-secondary"
+                                    href="{{ url_for('show_collections_info') }}">Info</a></li>
+            <li class="nav-item"><a class="nav-link px-2 text-body-secondary" href="#">About</a></li>
+        </ul>
+        <p class="text-center text-body-secondary">© {{ now.year }} AMProduction, Inc</p>
+    </footer>
 </div>

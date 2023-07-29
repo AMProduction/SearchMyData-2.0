@@ -48,5 +48,6 @@ def search_into_collection(collection_name, query_string: str):
             return 0
         else:
             logging.warning(f'{collection_name}: {result_count} records found')
-            return collection_name.find({'$text': {'$search': query_string}}, {'score': {'$meta': 'textScore'}}).sort([('score', {'$meta': 'textScore'})]).allow_disk_use(True)
+            return collection_name.find({'$text': {'$search': query_string}}, {'score': {'$meta': 'textScore'}}).sort(
+                    [('score', {'$meta': 'textScore'})]).allow_disk_use(True)
     gc.collect()
