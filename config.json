@@ -1,3 +1,0 @@
-{
-    "dbstring": "mongodb://root:rootpassword@localhost:27017/?authMechanism=SCRAM-SHA-1"
-}
