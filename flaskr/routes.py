@@ -2,16 +2,18 @@
 import os
 from datetime import datetime
 
-from flask import render_template, request
+from flask import render_template
 
 from flaskr import app, mongo
+from flaskr.forms import SearchForm
 
 
 @app.route("/")
 @app.route("/index")
 @app.route("/home")
 def home():
-    return render_template('home.html', status=True, index=True, now=datetime.utcnow())
+    form = SearchForm()
+    return render_template('home.html', form=form, status=True, index=True, now=datetime.utcnow())
 
 
 @app.route('/info')
@@ -27,8 +29,9 @@ def show_collections_info():
 @app.route('/result', methods=['POST', 'GET'])
 def show_search_results():
     from .src.data_action import search_into_collection
-    if request.method == 'POST':
-        search_string = request.form['search']
+    form = SearchForm()
+    if form.validate_on_submit():
+        search_string = form.search.data
         db = mongo[os.getenv('MONGO_INITDB_DATABASE')]
         # call search methods
         result_missing_persons = search_into_collection(db['MissingPersons'], search_string)
