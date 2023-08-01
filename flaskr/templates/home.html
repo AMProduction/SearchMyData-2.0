@@ -31,13 +31,16 @@
     </div>
 </nav>
 <div class="container">
-    <form action="/result" method="POST">
+    <form name="search" action="{{ url_for('show_search_results') }}" method="POST">
+        {{ form.hidden_tag() }}
         <div class="form-floating mt-3 mb-3">
-            <input class="form-control" id="search" name="search" placeholder="Search" required type="text">
-            <label for="search">Search</label>
+            {{ form.search(class="form-control") }}
+            {% for error in form.search.errors %}
+            <span class="error-message">{{ error }}</span>
+            {% endfor %}
         </div>
         <div class="col text-center">
-            <button class="btn btn-lg btn-outline-secondary" type="submit">Search</button>
+            {{ form.submit(class="btn btn-lg btn-outline-secondary") }}
         </div>
     </form>
 </div>
