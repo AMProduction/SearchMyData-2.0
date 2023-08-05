@@ -11,9 +11,7 @@ COPY ./requirements.txt /searchmydata2/requirements.txt
 RUN pip install -r requirements.txt
 
 # Bundle app source
-COPY ./main.py /searchmydata2/main.py
-COPY ./config.py /searchmydata2/config.py
-COPY ./flaskr/ /searchmydata2/
+COPY ./flask_app/ /searchmydata2/
 
 ARG FLASK_DEBUG
 ARG FLASK_APP
@@ -28,4 +26,4 @@ ENV MONGO_URI=${MONGO_URI}
 ENV MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
 
 EXPOSE 5000
-CMD [ "flask", "run","--host","0.0.0.0","--port","5000"]
+CMD [ "flask", "run"]
