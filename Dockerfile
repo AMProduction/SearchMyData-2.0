@@ -8,7 +8,7 @@ WORKDIR /searchmydata2
 # Install app dependencies
 COPY ./requirements.txt /searchmydata2/requirements.txt
 
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Bundle app source
 COPY ./flask_app/ /searchmydata2/
@@ -25,5 +25,5 @@ ENV SECRET_KEY=${SECRET_KEY}
 ENV MONGO_URI=${MONGO_URI}
 ENV MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
 
-EXPOSE 5000
-CMD [ "flask", "run"]
+EXPOSE 5001
+CMD [ "flask", "run", "--host", "0.0.0.0", "--port", "5001"]
