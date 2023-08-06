@@ -40,14 +40,23 @@ x-airflow-common:
       condition: service_healthy
 
 services:
+  searchmydata2_container:
+    image: andruxa17/searchmydata2:v2.0a
+    container_name: container-searchmydata2
+    restart: always
+    env_file:
+      .env
+    ports:
+      - "5001:5001"
+    networks:
+      - core-network
+
   mongodb_container:
     image: mongo:latest
     container_name: container-mongodb
     restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    env_file:
+      .env
     ports:
       - "27017:27017"
     networks:
