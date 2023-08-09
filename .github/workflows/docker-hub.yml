@@ -13,9 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       -
+        name: Create env file
+        run: cat .env >> $GITHUB_ENV
+      -
         name: Checkout
         uses: actions/checkout@v3
-        run: cat .env >> $GITHUB_ENV
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
