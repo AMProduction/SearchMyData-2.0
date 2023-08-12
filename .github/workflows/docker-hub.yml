@@ -28,25 +28,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       -
-        name: Build and export to Docker
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          build-args: |
-            FLASK_DEBUG=${{ vars.FLASK_DEBUG }}
-            FLASK_APP=${{ vars.FLASK_APP }}
-            SECRET_KEY=${{ vars.SECRET_KEY }}
-            MONGO_URI=${{ vars.MONGO_URI }}
-            MONGO_INITDB_DATABASE=${{ vars.MONGO_INITDB_DATABASE }}
-          file: ./Dockerfile
-          platforms: linux/arm64
-          load: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/${{ vars.APP_NAME }}:${{ vars.TAG }}
-      -
-        name: Test
-        run: |
-          docker run --rm ${{ secrets.DOCKER_USERNAME }}/${{ vars.APP_NAME }}:${{ vars.TAG }}
-      -
         name: Build and push
         uses: docker/build-push-action@v4
         with:
