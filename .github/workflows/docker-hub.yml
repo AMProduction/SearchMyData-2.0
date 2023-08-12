@@ -13,9 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       -
-        name: Create env file
-        run: cat .env >> $GITHUB_ENV
-      -
         name: Checkout
         uses: actions/checkout@v3
       -
@@ -37,11 +34,11 @@ jobs:
           context: .
           file: ./Dockerfile
           load: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/$APP_NAME:$TAG
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{ vars.APP_NAME }}:${{ vars.TAG }}
       -
         name: Test
         run: |
-          docker run --rm ${{ secrets.DOCKER_USERNAME }}/$APP_NAME:$TAG
+          docker run --rm ${{ secrets.DOCKER_USERNAME }}/${{ vars.APP_NAME }}:${{ vars.TAG }}
       -
         name: Build and push
         uses: docker/build-push-action@v4
@@ -50,4 +47,4 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/$APP_NAME:latest, ${{ secrets.DOCKER_USERNAME }}/$APP_NAME:$TAG
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{ vars.APP_NAME }}:latest, ${{ secrets.DOCKER_USERNAME }}/${{ vars.APP_NAME }}:${{ vars.TAG }}
