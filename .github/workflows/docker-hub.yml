@@ -33,10 +33,10 @@ jobs:
         with:
           context: .
           build-args: |
-            FLASK_DEBUG=${{ vars.FLASK_DEBUG }},
-            FLASK_APP=${{ vars.FLASK_APP }},
-            SECRET_KEY=${{ vars.SECRET_KEY }},
-            MONGO_URI=${{ vars.MONGO_URI }},
+            FLASK_DEBUG=${{ vars.FLASK_DEBUG }}
+            FLASK_APP=${{ vars.FLASK_APP }}
+            SECRET_KEY=${{ vars.SECRET_KEY }}
+            MONGO_URI=${{ vars.MONGO_URI }}
             MONGO_INITDB_DATABASE=${{ vars.MONGO_INITDB_DATABASE }}
           file: ./Dockerfile
           load: true
