@@ -39,6 +39,7 @@ jobs:
             MONGO_URI=${{ vars.MONGO_URI }}
             MONGO_INITDB_DATABASE=${{ vars.MONGO_INITDB_DATABASE }}
           file: ./Dockerfile
+          platforms: linux/arm64
           load: true
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ vars.APP_NAME }}:${{ vars.TAG }}
       -
@@ -51,6 +52,12 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
+          build-args: |
+            FLASK_DEBUG=${{ vars.FLASK_DEBUG }}
+            FLASK_APP=${{ vars.FLASK_APP }}
+            SECRET_KEY=${{ vars.SECRET_KEY }}
+            MONGO_URI=${{ vars.MONGO_URI }}
+            MONGO_INITDB_DATABASE=${{ vars.MONGO_INITDB_DATABASE }}
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ vars.APP_NAME }}:latest, ${{ secrets.DOCKER_USERNAME }}/${{ vars.APP_NAME }}:${{ vars.TAG }}
