@@ -41,7 +41,7 @@ x-airflow-common:
 
 services:
   searchmydata2_container:
-    image: andruxa17/searchmydata2:${TAG}
+    image: andruxa17/${APP_NAME}:${TAG}
     container_name: container-searchmydata2
     restart: always
     env_file:
