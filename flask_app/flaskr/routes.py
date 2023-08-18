@@ -3,7 +3,6 @@ import os
 from datetime import datetime
 
 from flask import render_template
-
 from flaskr import app, mongo
 from flaskr.forms import SearchForm
 
@@ -28,16 +27,24 @@ def show_collections_info():
 
 @app.route('/result', methods=['POST', 'GET'])
 def show_search_results():
-    from .src.data_action import search_into_collection
+    from .src.data_action import search_into_collection, get_pages_count
     form = SearchForm()
     if form.validate_on_submit():
         search_string = form.search.data
         db = mongo[os.getenv('MONGO_INITDB_DATABASE')]
         # call search methods
-        result_missing_persons = search_into_collection(db['MissingPersons'], search_string)
-        result_wanted_persons = search_into_collection(db['WantedPersons'], search_string)
-        result_debtors = search_into_collection(db['Debtors'], search_string)
-        result_lustrated = search_into_collection(db['Lustrated'], search_string)
+        result_count_missing_persons, result_missing_persons = search_into_collection(db['MissingPersons'],
+                                                                                      search_string)
+        pages_for_missing_persons = get_pages_count(result_count_missing_persons)
+        result_count_wanted_persons, result_wanted_persons = search_into_collection(db['WantedPersons'], search_string)
+        pages_for_wanted_persons = get_pages_count(result_count_wanted_persons)
+        result_count_debtors, result_debtors = search_into_collection(db['Debtors'], search_string)
+        pages_for_debtors = get_pages_count(result_count_debtors)
+        result_count_lustrated, result_lustrated = search_into_collection(db['Lustrated'], search_string)
+        pages_for_lustrated = get_pages_count(result_count_lustrated)
         return render_template('result.html', now=datetime.utcnow(), result_MissingPersons=result_missing_persons,
                                result_WantedPersons=result_wanted_persons, result_Debtors=result_debtors,
-                               result_Lustrated=result_lustrated)
+                               result_Lustrated=result_lustrated,
+                               pages_for_missing_persons=pages_for_missing_persons,
+                               pages_for_wanted_persons=pages_for_wanted_persons,
+                               pages_for_debtors=pages_for_debtors, pages_for_lustrated=pages_for_lustrated)

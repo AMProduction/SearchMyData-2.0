@@ -45,9 +45,18 @@ def search_into_collection(collection_name, query_string: str):
     else:
         if result_count == 0:
             logging.warning(f'{collection_name}: No data found')
-            return 0
+            return 0, 0
         else:
             logging.warning(f'{collection_name}: {result_count} records found')
-            return collection_name.find({'$text': {'$search': query_string}}, {'score': {'$meta': 'textScore'}}).sort(
+            return result_count, collection_name.find({'$text': {'$search': query_string}},
+                                                      {'score': {'$meta': 'textScore'}}).sort(
                     [('score', {'$meta': 'textScore'})]).allow_disk_use(True)
     gc.collect()
+
+
+def get_pages_count(documents_count: int) -> int:
+    DOCUMENTS_PER_PAGE = 100
+    result = documents_count // DOCUMENTS_PER_PAGE
+    if documents_count % DOCUMENTS_PER_PAGE:
+        result += 1
+    return result
