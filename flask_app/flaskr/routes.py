@@ -42,9 +42,7 @@ def show_search_results():
         pages_for_debtors = get_pages_count(result_count_debtors)
         result_count_lustrated, result_lustrated = search_into_collection(db['Lustrated'], search_string)
         pages_for_lustrated = get_pages_count(result_count_lustrated)
+        pages_count = max(pages_for_lustrated, pages_for_debtors, pages_for_wanted_persons, pages_for_missing_persons)
         return render_template('result.html', now=datetime.utcnow(), result_MissingPersons=result_missing_persons,
                                result_WantedPersons=result_wanted_persons, result_Debtors=result_debtors,
-                               result_Lustrated=result_lustrated,
-                               pages_for_missing_persons=pages_for_missing_persons,
-                               pages_for_wanted_persons=pages_for_wanted_persons,
-                               pages_for_debtors=pages_for_debtors, pages_for_lustrated=pages_for_lustrated)
+                               result_Lustrated=result_lustrated, pages_count=pages_count)
