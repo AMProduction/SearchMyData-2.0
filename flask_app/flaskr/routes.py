@@ -36,6 +36,7 @@ def show_search_results():
         search_string = session['search_string']
     page = request.args.get('page', 0, type=int)
     db = mongo[os.getenv('MONGO_INITDB_DATABASE')]
+
     # call search methods
     result_count_missing_persons, result_missing_persons = search_into_collection(db['MissingPersons'],
                                                                                   search_string, page)
@@ -47,7 +48,17 @@ def show_search_results():
     pages_for_debtors = get_pages_count(result_count_debtors)
     result_count_lustrated, result_lustrated = search_into_collection(db['Lustrated'], search_string, page)
     pages_for_lustrated = get_pages_count(result_count_lustrated)
+
     pages_count = max(pages_for_lustrated, pages_for_debtors, pages_for_wanted_persons, pages_for_missing_persons)
+    if page == 0:
+        has_previous = False
+    else:
+        has_previous = True
+    if page == pages_count-1:
+        has_next = False
+    else:
+        has_next = True
     return render_template('result.html', now=datetime.utcnow(), result_MissingPersons=result_missing_persons,
                            result_WantedPersons=result_wanted_persons, result_Debtors=result_debtors,
-                           result_Lustrated=result_lustrated, pages_count=pages_count)
+                           result_Lustrated=result_lustrated, pages_count=pages_count, has_next=has_next,
+                           has_previous=has_previous, page=page)
