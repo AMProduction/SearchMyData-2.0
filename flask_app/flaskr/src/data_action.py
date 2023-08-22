@@ -36,7 +36,7 @@ def check_is_expired(service_collection_name) -> bool:
 def search_into_collection(collection_name, query_string: str, page_number: int = 0):
     """
     Search into a collection.
-    @param page_number:
+    @param page_number: page to show
     @param collection_name: where to search
     @param query_string: what to search
     @return: the search results
@@ -60,6 +60,11 @@ def search_into_collection(collection_name, query_string: str, page_number: int 
 
 
 def get_pages_count(documents_count: int) -> int:
+    """
+    The return amount of pages needs to represent the amount of the documents
+    @param documents_count: amount of documents
+    @return: count of pages
+    """
     result = documents_count // DOCUMENTS_PER_PAGE
     if documents_count % DOCUMENTS_PER_PAGE:
         result += 1

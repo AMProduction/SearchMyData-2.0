@@ -83,7 +83,7 @@
     <div class="tab-content">
         <div aria-labelledby="MissingPersons-tab" class="tab-pane active" id="MissingPersons" role="tabpanel">
             <table class="table table-striped table-secondary table-responsive table-sm caption-top">
-                <caption>Інформація про безвісно зниклих громадян</caption>
+                <caption>Інформація про безвісно зниклих громадян{% if result_count_missing_persons %}. {{ result_count_missing_persons }} records found {% endif %}</caption>
                 <thead>
                 <tr>
                     <th scope="col">LAST NAME</th>
@@ -126,7 +126,7 @@
         </div>
         <div aria-labelledby="WantedPersons-tab" class="tab-pane" id="WantedPersons" role="tabpanel">
             <table class="table table-striped table-secondary table-responsive table-sm caption-top">
-                <caption>Інформація про осіб, які переховуються від органів влади</caption>
+                <caption>Інформація про осіб, які переховуються від органів влади{% if result_count_wanted_persons %}. {{ result_count_wanted_persons }} records found {% endif %}</caption>
                 <thead>
                 <tr>
                     <th scope="col">LAST NAME</th>
@@ -175,7 +175,7 @@
         </div>
         <div aria-labelledby="Debtors-tab" class="tab-pane" id="Debtors" role="tabpanel">
             <table class="table table-striped table-secondary table-responsive table-sm caption-top">
-                <caption>Єдиний реєстр боржників</caption>
+                <caption>Єдиний реєстр боржників{% if result_count_debtors %}. {{ result_count_debtors }} records found {% endif %}</caption>
                 <thead>
                 <tr>
                     <th scope="col">DEBTOR NAME</th>
@@ -302,7 +302,7 @@
         <div aria-labelledby="Lustrated-tab" class="tab-pane" id="Lustrated" role="tabpanel">
             <table class="table table-striped table-secondary table-responsive table-sm caption-top">
                 <caption>Єдиний державний реєстр осіб, щодо яких застосовано положення Закону України «Про очищення
-                    влади»
+                    влади»{% if result_count_lustrated %}. {{ result_count_lustrated }} records found {% endif %}
                 </caption>
                 <thead>
                 <tr>
