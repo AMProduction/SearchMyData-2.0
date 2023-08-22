@@ -30,11 +30,13 @@
         </div>
     </div>
 </nav>
+
 <div class="container">
     <form name="search" action="{{ url_for('show_search_results') }}" method="POST">
         {{ form.hidden_tag() }}
         <div class="form-floating mt-3 mb-3">
             {{ form.search(class="form-control") }}
+            <small id="passwordHelpInline" class="text-muted">Type your text here</small>
             {% for error in form.search.errors %}
             <span class="error-message">{{ error }}</span>
             {% endfor %}

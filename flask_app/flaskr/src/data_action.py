@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 
 from pymongo.errors import PyMongoError
 
+DOCUMENTS_PER_PAGE = 100
+
 
 def get_registers_info(service_collection_name):
     """Show the list of available registers, count of documents, and the last update date.
@@ -31,9 +33,10 @@ def check_is_expired(service_collection_name) -> bool:
     return is_expired
 
 
-def search_into_collection(collection_name, query_string: str):
+def search_into_collection(collection_name, query_string: str, page_number: int = 0):
     """
     Search into a collection.
+    @param page_number: page to show
     @param collection_name: where to search
     @param query_string: what to search
     @return: the search results
@@ -45,9 +48,24 @@ def search_into_collection(collection_name, query_string: str):
     else:
         if result_count == 0:
             logging.warning(f'{collection_name}: No data found')
-            return 0
+            return 0, 0
         else:
+            to_skip = page_number * DOCUMENTS_PER_PAGE
             logging.warning(f'{collection_name}: {result_count} records found')
-            return collection_name.find({'$text': {'$search': query_string}}, {'score': {'$meta': 'textScore'}}).sort(
+            return result_count, collection_name.find({'$text': {'$search': query_string}},
+                                                      {'score': {'$meta': 'textScore'}}, skip=to_skip,
+                                                      limit=DOCUMENTS_PER_PAGE).sort(
                     [('score', {'$meta': 'textScore'})]).allow_disk_use(True)
     gc.collect()
+
+
+def get_pages_count(documents_count: int) -> int:
+    """
+    The return amount of pages needs to represent the amount of the documents
+    @param documents_count: amount of documents
+    @return: count of pages
+    """
+    result = documents_count // DOCUMENTS_PER_PAGE
+    if documents_count % DOCUMENTS_PER_PAGE:
+        result += 1
+    return result
