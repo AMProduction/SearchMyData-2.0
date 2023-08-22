@@ -12,6 +12,8 @@ from flaskr.forms import SearchForm
 @app.route("/home")
 def home():
     form = SearchForm()
+    if session['search_string']:
+        form.search.data = session['search_string']
     return render_template('home.html', form=form, status=True, index=True, now=datetime.utcnow())
 
 
