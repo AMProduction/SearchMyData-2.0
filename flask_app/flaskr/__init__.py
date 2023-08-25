@@ -15,6 +15,6 @@ csrf = CSRFProtect(app)
 csrf.init_app(app)
 
 mongo = MongoClient(os.getenv('MONGO_URI'))
-connect(host=os.getenv('MONGO_URI'))
+connect(alias=os.getenv('MONGO_INITDB_DATABASE'), host=os.getenv('MONGO_URI'))
 
 from flaskr import routes

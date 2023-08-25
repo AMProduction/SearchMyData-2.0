@@ -32,10 +32,10 @@
         <tbody>
         {% for row in result %}
         <tr>
-            <td>{{ row['_id'] }}</td>
-            <td>{{ row['Description'] }}</td>
-            <td>{{ row['DocumentsCount'] }}</td>
-            <td>{{ '{:.19}'.format(row['LastModifiedDate']) }}</td>
+            <td>{{ row['id'] }}</td>
+            <td>{{ row['description'] }}</td>
+            <td>{{ row['documents_count'] }}</td>
+            <td>{{ '{:.16}'.format(row['last_modified_date']) }}</td>
         </tr>
         {% endfor %}
         </tbody>

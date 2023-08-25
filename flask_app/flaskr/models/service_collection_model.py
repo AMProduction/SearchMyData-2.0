@@ -3,7 +3,7 @@ from mongoengine import *
 
 
 class RegisterInfo(Document):
-    id = IntField(db_field="_id", required=True, unique=True, primary_key=True)
+    id = IntField(db_field="_id", required=True, primary_key=True)
     description = StringField(db_field="Description", max_length=400, required=True)
     documents_count = IntField(db_field="DocumentsCount", required=True)
     created_date = DateTimeField(db_field="CreatedDate", required=True)

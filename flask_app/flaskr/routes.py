@@ -4,7 +4,8 @@ from datetime import datetime
 
 from flask import render_template, request, session
 from flaskr import app, mongo
-from flaskr.forms import SearchForm
+
+from .forms import SearchForm
 
 
 @app.route("/")
@@ -19,11 +20,9 @@ def home():
 
 @app.route('/info')
 def show_collections_info():
-    from .src.data_action import get_registers_info, check_is_expired
-    db = mongo[os.getenv('MONGO_INITDB_DATABASE')]
-    service_collection = db['ServiceCollection']
-    registers_info = get_registers_info(service_collection)
-    expiration = check_is_expired(service_collection)
+    from .src.data_action import check_is_expired, get_registers_info
+    registers_info = get_registers_info()
+    expiration = check_is_expired()
     return render_template('info.html', result=registers_info, isExpired=expiration, now=datetime.utcnow())
 
 

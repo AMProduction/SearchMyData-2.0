@@ -8,27 +8,27 @@ from pymongo.errors import PyMongoError
 DOCUMENTS_PER_PAGE = 100
 
 
-def get_registers_info(service_collection_name):
-    """Show the list of available registers, count of documents, and the last update date.
-    @param service_collection_name: a service collection name
-    @return: result set
+def get_registers_info():
     """
-    result = service_collection_name.find({}, {'_id': 1, 'Description': 1, 'DocumentsCount': 1,
-                                               'LastModifiedDate': 1}).sort([('_id', 1)])
-    return result
+    Show the list of available registers, count of documents, and the last update date
+    :return: result set
+    """
+    from ..models.service_collection_model import RegisterInfo
+    return RegisterInfo.objects.all()
 
 
-def check_is_expired(service_collection_name) -> bool:
-    """Check if a dataset last updated date is older than 2 days ago.
-    @param service_collection_name: a service collection name
-    @return: if is expired
+def check_is_expired() -> bool:
     """
+    Check if a dataset last updated date is older than 2 days ago.
+    :return: if is expired
+    """
+    from ..models.service_collection_model import RegisterInfo
     is_expired = False
     expired_time = datetime.now() - timedelta(days=2)
-    for record in service_collection_name.find():
-        last_modified_date = datetime.strptime(record['LastModifiedDate'], '%Y-%m-%d %H:%M:%S.%f')
+    for record in RegisterInfo.objects:
+        last_modified_date = datetime.strptime(record['last_modified_date'], '%Y-%m-%d %H:%M:%S.%f')
         if last_modified_date < expired_time:
-            logging.warning(f'{record["Description"]} is out of date')
+            logging.warning(f'{record["description"]} is out of date')
             is_expired = True
     return is_expired
 
@@ -36,10 +36,10 @@ def check_is_expired(service_collection_name) -> bool:
 def search_into_collection(collection_name, query_string: str, page_number: int = 0):
     """
     Search into a collection.
-    @param page_number: page to show
-    @param collection_name: where to search
-    @param query_string: what to search
-    @return: the search results
+    :param collection_name: page to show
+    :param query_string: where to search
+    :param page_number: what to search
+    :return: the search results
     """
     try:
         result_count = collection_name.count_documents({'$text': {'$search': query_string}})
@@ -62,8 +62,8 @@ def search_into_collection(collection_name, query_string: str, page_number: int 
 def get_pages_count(documents_count: int) -> int:
     """
     The return amount of pages needs to represent the amount of the documents
-    @param documents_count: amount of documents
-    @return: count of pages
+    :param documents_count: amount of documents
+    :return: count of pages
     """
     result = documents_count // DOCUMENTS_PER_PAGE
     if documents_count % DOCUMENTS_PER_PAGE:
