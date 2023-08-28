@@ -8,5 +8,4 @@ class RegisterInfo(Document):
     documents_count = IntField(db_field="DocumentsCount", required=True)
     created_date = DateTimeField(db_field="CreatedDate", required=True)
     last_modified_date = DateTimeField(db_field="LastModifiedDate", required=True)
-    meta = {'db_alias': 'searchmydata',
-            'collection': 'ServiceCollection'}
+    meta = {'db_alias': 'searchmydata', 'collection': 'ServiceCollection'}
