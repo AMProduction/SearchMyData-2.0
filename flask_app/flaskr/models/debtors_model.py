@@ -3,6 +3,7 @@ from mongoengine import *
 
 
 class Debtor(Document):
+    mongo_id = ObjectIdField(db_field="_id")
     debtor_name = StringField(db_field="DEBTOR_NAME", max_length=200, required=True)
     debtor_birthdate = DateTimeField(db_field="DEBTOR_BIRTHDATE", required=False)
     debtor_code = IntField(db_field="DEBTOR_CODE", required=True)

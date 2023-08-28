@@ -33,6 +33,30 @@ def check_is_expired() -> bool:
     return is_expired
 
 
+def search_into_collection_v2(collection_name, query_string: str, page_number: int = 0):
+    """
+    Search into a collection.
+    :param collection_name: page to show
+    :param query_string: where to search
+    :param page_number: what to search
+    :return: the search results
+    """
+    try:
+        result_count = collection_name.objects.search_text(query_string).count()
+    except PyMongoError as e:
+        logging.error(f'Error during search into {collection_name} occurred: {e}')
+    else:
+        if result_count == 0:
+            logging.warning(f'{collection_name}: No data found')
+            return 0, 0
+        else:
+            to_skip = page_number * DOCUMENTS_PER_PAGE
+            logging.warning(f'{collection_name}: {result_count} records found')
+            return result_count, collection_name.objects[to_skip:to_skip + DOCUMENTS_PER_PAGE].search_text(
+                query_string).order_by('$text_score')
+    gc.collect()
+
+
 def search_into_collection(collection_name, query_string: str, page_number: int = 0):
     """
     Search into a collection.

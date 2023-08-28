@@ -3,6 +3,7 @@ from mongoengine import *
 
 
 class WantedPerson(Document):
+    mongo_id = ObjectIdField(db_field="_id")
     id = IntField(db_field="ID", required=True)
     ovd = StringField(db_field="OVD", max_length=400, required=True)
     category = StringField(db_field="CATEGORY", max_length=400, required=True)
