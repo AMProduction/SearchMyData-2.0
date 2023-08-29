@@ -94,7 +94,7 @@
                     <th scope="col">LOST DATE</th>
                 </tr>
                 </thead>
-                {% if result_MissingPersons != 0 %}
+                {% if result_count_missing_persons %}
                 <tbody>
                 {% for row in result_MissingPersons %}
                 <tr>
@@ -107,7 +107,7 @@
                 </tr>
                 {% endfor %}
                 </tbody>
-                {% elif result_MissingPersons == 0 %}
+                {% else %}
                 <tfoot>
                 <tr>
                     <td class="bi bi-exclamation-triangle-fill" colspan="6"> The missing persons register: No data
@@ -120,7 +120,7 @@
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <button type="button" class="btn btn-secondary bi bi-cloud-download-fill"
                         onclick="saveSearchResultToFile('MissingPersons');"
-                        {% if result_MissingPersons == 0 %} disabled {% endif %}> Save
+                        {% if not result_count_missing_persons %} disabled {% endif %}> Save
                 </button>
             </div>
         </div>
@@ -140,7 +140,7 @@
                     <th scope="col">CRIME</th>
                 </tr>
                 </thead>
-                {% if result_WantedPersons != 0 %}
+                {% if result_count_wanted_persons %}
                 <tbody>
                 {% for row in result_WantedPersons %}
                 <tr>
@@ -156,7 +156,7 @@
                 </tr>
                 {% endfor %}
                 </tbody>
-                {% elif result_WantedPersons == 0 %}
+                {% else %}
                 <tfoot>
                 <tr>
                     <td class="bi bi-exclamation-triangle-fill" colspan="9"> The wanted persons register: No data
@@ -169,7 +169,7 @@
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <button type="button" class="btn btn-secondary bi bi-cloud-download-fill"
                         onclick="saveSearchResultToFile('WantedPersons');"
-                        {% if result_WantedPersons == 0 %} disabled {% endif %}> Save
+                        {% if not result_count_wanted_persons %} disabled {% endif %}> Save
                 </button>
             </div>
         </div>
@@ -186,7 +186,7 @@
                     <th scope="col">CATEGORY</th>
                 </tr>
                 </thead>
-                {% if result_Debtors != 0 %}
+                {% if result_count_debtors %}
                 <tbody>
                 {% for row in result_Debtors %}
                 <tr>
@@ -199,7 +199,7 @@
                 </tr>
                 {% endfor %}
                 </tbody>
-                {% elif result_Debtors == 0 %}
+                {% else %}
                 <tfoot>
                 <tr>
                     <td class="bi bi-exclamation-triangle-fill" colspan="6"> The debtors register: No data found
@@ -211,7 +211,7 @@
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <button type="button" class="btn btn-secondary bi bi-cloud-download-fill"
                         onclick="saveSearchResultToFile('Debtors');"
-                        {% if result_Debtors == 0 %} disabled {% endif %}> Save
+                        {% if not result_count_debtors %} disabled {% endif %}> Save
                 </button>
             </div>
         </div>
@@ -312,7 +312,7 @@
                     <th scope="col">PERIOD</th>
                 </tr>
                 </thead>
-                {% if result_Lustrated != 0 %}
+                {% if result_count_lustrated %}
                 <tbody>
                 {% for row in result_Lustrated %}
                 <tr>
@@ -323,7 +323,7 @@
                 </tr>
                 {% endfor %}
                 </tbody>
-                {% elif result_Lustrated == 0 %}
+                {% else %}
                 <tfoot>
                 <tr>
                     <td class="bi bi-exclamation-triangle-fill" colspan="4"> The Lustrated Persons register: No data
@@ -336,7 +336,7 @@
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <button type="button" class="btn btn-secondary bi bi-cloud-download-fill"
                         onclick="saveSearchResultToFile('Lustrated');"
-                        {% if result_Lustrated == 0 %} disabled {% endif %}> Save
+                        {% if not result_count_lustrated %} disabled {% endif %}> Save
                 </button>
             </div>
         </div>

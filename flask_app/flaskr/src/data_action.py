@@ -1,11 +1,9 @@
 #  Copyright (c) 2023 Andrii Malchyk, All rights reserved.
-import gc
 import logging
+import os
 from datetime import datetime, timedelta
 
-from pymongo.errors import PyMongoError
-
-DOCUMENTS_PER_PAGE = 100
+DOCUMENTS_PER_PAGE = int(os.getenv('DOCUMENTS_PER_PAGE'))
 
 
 def get_registers_info():
@@ -33,28 +31,37 @@ def check_is_expired() -> bool:
     return is_expired
 
 
-def search_into_collection(collection_name, query_string: str, page_number: int = 0):
+def get_search_result_count(collection_name, query_string: str) -> int:
     """
-    Search into a collection.
-    :param collection_name: page to show
-    :param query_string: where to search
-    :param page_number: what to search
-    :return: the search results
+    Return search result count.
+    :param collection_name: where to search
+    :param query_string: what to search
+    :return: results count
     """
     try:
         result_count = collection_name.objects.search_text(query_string).count()
-    except PyMongoError as e:
+    except Exception as e:
         logging.error(f'Error during search into {collection_name} occurred: {e}')
     else:
-        if result_count == 0:
-            logging.warning(f'{collection_name}: No data found')
-            return 0, 0
-        else:
-            to_skip = page_number * DOCUMENTS_PER_PAGE
+        if result_count:
             logging.warning(f'{collection_name}: {result_count} records found')
-            return result_count, collection_name.objects[to_skip:to_skip + DOCUMENTS_PER_PAGE].search_text(
-                query_string).order_by('$text_score')
-    gc.collect()
+            return result_count
+        else:
+            logging.warning(f'{collection_name}: No data found')
+            return 0
+
+
+def search_into_collection(collection_name, query_string: str, page_number: int = 0):
+    """
+    Search into a collection.
+    :param collection_name: where to search
+    :param query_string: what to search
+    :param page_number: page to show
+    :return: the search results
+    """
+    to_skip = page_number * DOCUMENTS_PER_PAGE
+    return collection_name.objects[to_skip:to_skip + DOCUMENTS_PER_PAGE].search_text(query_string).order_by(
+            '$text_score')
 
 
 def get_pages_count(documents_count: int) -> int:
