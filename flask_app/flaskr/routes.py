@@ -28,7 +28,7 @@ def show_collections_info():
 
 @app.route('/result', methods=['POST', 'GET'])
 def show_search_results():
-    from .src.data_action import search_into_collection, get_pages_count, search_into_collection_v2
+    from .src.data_action import search_into_collection, get_pages_count
     from .models.debtors_model import Debtor
     from .models.lustrated_persons_model import LustratedPerson
     from .models.missing_persons_model import MissingPerson
@@ -40,19 +40,15 @@ def show_search_results():
     else:
         search_string = session['search_string']
     page = request.args.get('page', 0, type=int)
-    db = mongo[os.getenv('MONGO_INITDB_DATABASE')]
 
     # call search methods
-    result_count_missing_persons, result_missing_persons = search_into_collection_v2(MissingPerson, search_string,
-                                                                                     page)
+    result_count_missing_persons, result_missing_persons = search_into_collection(MissingPerson, search_string, page)
     pages_for_missing_persons = get_pages_count(result_count_missing_persons)
-
-    result_count_wanted_persons, result_wanted_persons = search_into_collection(db['WantedPersons'], search_string,
-                                                                                page)
+    result_count_wanted_persons, result_wanted_persons = search_into_collection(WantedPerson, search_string, page)
     pages_for_wanted_persons = get_pages_count(result_count_wanted_persons)
-    result_count_debtors, result_debtors = search_into_collection(db['Debtors'], search_string, page)
+    result_count_debtors, result_debtors = search_into_collection(Debtor, search_string, page)
     pages_for_debtors = get_pages_count(result_count_debtors)
-    result_count_lustrated, result_lustrated = search_into_collection(db['Lustrated'], search_string, page)
+    result_count_lustrated, result_lustrated = search_into_collection(LustratedPerson, search_string, page)
     pages_for_lustrated = get_pages_count(result_count_lustrated)
 
     pages_count = max(pages_for_lustrated, pages_for_debtors, pages_for_wanted_persons, pages_for_missing_persons)

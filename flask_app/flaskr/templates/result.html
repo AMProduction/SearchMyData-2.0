@@ -144,15 +144,15 @@
                 <tbody>
                 {% for row in result_WantedPersons %}
                 <tr>
-                    <td>{{ row['LAST_NAME_U'] }}</td>
-                    <td>{{ row['FIRST_NAME_U'] }}</td>
-                    <td>{{ row['MIDDLE_NAME_U'] }}</td>
-                    <td>{{ '{:.10}'.format(row['BIRTH_DATE']) }}</td>
-                    <td>{{ row['LOST_PLACE'] }}</td>
-                    <td>{{ '{:.10}'.format(row['LOST_DATE']) }}</td>
-                    <td>{{ row['CATEGORY'] }}</td>
-                    <td>{{ row['OVD'] }}</td>
-                    <td>{{ row['ARTICLE_CRIM'] }}</td>
+                    <td>{{ row['last_name_u'] }}</td>
+                    <td>{{ row['first_name_u'] }}</td>
+                    <td>{{ row['middle_name_u'] }}</td>
+                    <td>{{ '{:.10}'.format(row['birth_date']) }}</td>
+                    <td>{{ row['lost_place'] }}</td>
+                    <td>{{ '{:.10}'.format(row['lost_date']) }}</td>
+                    <td>{{ row['category'] }}</td>
+                    <td>{{ row['ovd'] }}</td>
+                    <td>{{ row['article_crime'] }}</td>
                 </tr>
                 {% endfor %}
                 </tbody>
@@ -190,12 +190,12 @@
                 <tbody>
                 {% for row in result_Debtors %}
                 <tr>
-                    <td>{{ row['DEBTOR_NAME'] }}</td>
-                    <td>{{ row['DEBTOR_CODE'] }}</td>
-                    <td>{{ row['PUBLISHER'] }}</td>
-                    <td>{{ row['ORG_NAME'] }}</td>
-                    <td>{{ row['EMP_FULL_FIO'] }}</td>
-                    <td>{{ row['VD_CAT'] }}</td>
+                    <td>{{ row['debtor_name'] }}</td>
+                    <td>{{ row['debtor_code'] }}</td>
+                    <td>{{ row['publisher'] }}</td>
+                    <td>{{ row['org_name'] }}</td>
+                    <td>{{ row['emp_full_fio'] }}</td>
+                    <td>{{ row['vd_cat'] }}</td>
                 </tr>
                 {% endfor %}
                 </tbody>
