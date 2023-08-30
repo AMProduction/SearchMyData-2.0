@@ -21,14 +21,9 @@ def check_is_expired() -> bool:
     :return: if is expired
     """
     from ..models.service_collection_model import RegisterInfo
-    is_expired = False
     expired_time = datetime.now() - timedelta(days=2)
-    for record in RegisterInfo.objects:
-        last_modified_date = datetime.strptime(record['last_modified_date'], '%Y-%m-%d %H:%M:%S.%f')
-        if last_modified_date < expired_time:
-            logging.warning(f'{record["description"]} is out of date')
-            is_expired = True
-    return is_expired
+    return any(datetime.strptime(record['last_modified_date'], '%Y-%m-%d %H:%M:%S.%f') < expired_time for record in
+               RegisterInfo.objects)
 
 
 def get_search_result_count(collection_name, query_string: str) -> int:
