@@ -1,2 +1,83 @@
-### v2.0. First release. XX/XX/2021
-* ???
+- Change import in routes.py
+- Merge pull request #31 from AMProduction/24-switch-to-mongoengine-as-an-orm
+- Beautifier
+- Refactoring. requirements.txt updated
+- Refactored /result route
+- Added processing all registers through the ORM
+- Added mapping for ObjectID field in the models. Added processing Missing Persons register through the ORM
+- Added: debtors_model, lustrated_persons_model, missing_persons_model, wanted_persons_model
+- Refactored the service collection processing
+- Create PULL_REQUEST_TEMPLATE.md
+- Create CONTRIBUTING.md
+- Added mongoengine to the requirements.txt. Added the RegisterInfo model
+- Update README.md
+- Hot fix for session variable
+- docker-compose.yml: new Airflow 2.7.0
+- Merge pull request #28 from AMProduction/21-pagination-for-search-result-presentation
+- Added saving search query
+- Docstring updated. Added documents found count. SearchForm modified
+- Added processing NEXT and PREVIOUS buttons
+- Added process page_number from the URL
+- Added the paginations to the template
+- Return documents per page and page numbers
+- Modified docker-hub.yml and docker-compose.yml
+- Merge pull request #27 from AMProduction/14-cicd-pipeline
+- docker-hub.yml: deleted TEST stage
+- docker-hub.yml: build-args modified
+- docker-hub.yml: build-args modified
+- docker-hub.yml: build-args added
+- docker-hub.yml modified
+- Fixed Github Actions badge in the README.md. docker-hub.yml modified to read the env file
+- README.md modified
+- Added GitHub actions to build and push imagee to Docker hub
+- Merge pull request #26 from AMProduction/12-dockerizing-the-main-app
+- docker-compose.yml modified: passed image TAG from the env file
+- Dockerfile modified: additional security. docker-compose.yml modified: add the new service - the flask app
+- Dockerfile modified: port changed
+- Dockerfile modified. Folder structure changed
+- Dockerfile added
+- Merge pull request #25 from AMProduction/10-switch-the-main-web-app-to-the-wtforms
+- Added CSRF app protection. Added WTForms support
+- Merge pull request #23
+- Code beautification
+- HTML structure changed
+- Refactored search results representation
+- Added CodeQL badge to README.md
+- Update README.md
+- Refactored get_collections_info() function
+- Dynamic display year in the footer of the pages
+- Read the DB connection string from the env file
+- Merge pull request #18 from AMProduction/9-refactoring-etl-pipeline
+- Doc string updated
+- The big refactoring
+- DebtorsRegister.py: went back to insert_one. Code base restructured
+- Play around insert_many
+- Work with ZIP as a binary stream. No more unzipping
+- Work with XML inside ZIP without unpacking
+- Create SECURITY.md
+- Refactoring LustratedPersonsRegister.py and DebtorsRegister.py modules
+- Merge remote-tracking branch 'origin/9-refactoring-etl-pipeline' into 9-refactoring-etl-pipeline
+- Refactoring DebtorsRegister.py modules
+- Delete .idea directory
+- Experiments with CSV file reading
+- Merge pull request #16 from AMProduction/migrate-to-airflow
+- Added apache-airflow to requirements.txt
+- Migrated to Airflow
+- Passed the secret variables to the docker-compose.yml. Strart using Airflow
+- The docker-compose.yml was added to start Mongo and Airflow containers
+- The big refactoring began
+- Merge pull request #8 from AMProduction/Unit_tests
+- Tests enhancements. Added session scope for a fixture
+- Merge pull request #7 from AMProduction/Save_search_results
+- Search results save to PDF via html2pdf library
+- README.md changed
+- Merge pull request #5 from AMProduction/Sync_codebase
+- Lustrated persons tab added to Search result page
+- Sync_codebase
+- Update issue templates
+- Create CODE_OF_CONDUCT.md
+- Refactoring to implement PEP 8
+- readme is changed
+- UI improvements
+- Migration to flask
+- Initial commit
