@@ -1,83 +1,76 @@
-- Change import in routes.py
-- Merge pull request #31 from AMProduction/24-switch-to-mongoengine-as-an-orm
-- Beautifier
-- Refactoring. requirements.txt updated
-- Refactored /result route
-- Added processing all registers through the ORM
-- Added mapping for ObjectID field in the models. Added processing Missing Persons register through the ORM
-- Added: debtors_model, lustrated_persons_model, missing_persons_model, wanted_persons_model
-- Refactored the service collection processing
-- Create PULL_REQUEST_TEMPLATE.md
-- Create CONTRIBUTING.md
-- Added mongoengine to the requirements.txt. Added the RegisterInfo model
-- Update README.md
-- Hot fix for session variable
-- docker-compose.yml: new Airflow 2.7.0
-- Merge pull request #28 from AMProduction/21-pagination-for-search-result-presentation
-- Added saving search query
-- Docstring updated. Added documents found count. SearchForm modified
-- Added processing NEXT and PREVIOUS buttons
-- Added process page_number from the URL
-- Added the paginations to the template
-- Return documents per page and page numbers
-- Modified docker-hub.yml and docker-compose.yml
-- Merge pull request #27 from AMProduction/14-cicd-pipeline
-- docker-hub.yml: deleted TEST stage
-- docker-hub.yml: build-args modified
-- docker-hub.yml: build-args modified
-- docker-hub.yml: build-args added
-- docker-hub.yml modified
-- Fixed Github Actions badge in the README.md. docker-hub.yml modified to read the env file
-- README.md modified
-- Added GitHub actions to build and push imagee to Docker hub
-- Merge pull request #26 from AMProduction/12-dockerizing-the-main-app
-- docker-compose.yml modified: passed image TAG from the env file
-- Dockerfile modified: additional security. docker-compose.yml modified: add the new service - the flask app
-- Dockerfile modified: port changed
-- Dockerfile modified. Folder structure changed
-- Dockerfile added
-- Merge pull request #25 from AMProduction/10-switch-the-main-web-app-to-the-wtforms
-- Added CSRF app protection. Added WTForms support
-- Merge pull request #23
-- Code beautification
-- HTML structure changed
-- Refactored search results representation
-- Added CodeQL badge to README.md
-- Update README.md
+## v2.0
+
+### The main pull requests
+
+- https://github.com/AMProduction/SearchMyData-2.0/pull/16
+- https://github.com/AMProduction/SearchMyData-2.0/pull/18
+- https://github.com/AMProduction/SearchMyData-2.0/pull/23
+- https://github.com/AMProduction/SearchMyData-2.0/pull/25
+
+### The main changes
+
+- Migration to [Flask](https://flask.palletsprojects.com/en/2.3.x/)
+- UI improvements
+- Refactoring to implement [PEP 8](https://peps.python.org/pep-0008/)
+- Update [the issue templates](.github/ISSUE_TEMPLATE)
+- Create [CODE_OF_CONDUCT.md](docs/CODE_OF_CONDUCT.md)
+- Search results save to PDF via [html2pdf](https://www.npmjs.com/package/html2pdf.js/v/0.10.1) library
+- The [docker-compose.yml](docker-compose.yml) added
+- Migrated to [Airflow](https://airflow.apache.org)
+- Refactoring ETL pipeline
+- Create [SECURITY.md](docs/SECURITY.md)
+- Doc strings updated
 - Refactored get_collections_info() function
 - Dynamic display year in the footer of the pages
-- Read the DB connection string from the env file
-- Merge pull request #18 from AMProduction/9-refactoring-etl-pipeline
-- Doc string updated
-- The big refactoring
-- DebtorsRegister.py: went back to insert_one. Code base restructured
-- Play around insert_many
-- Work with ZIP as a binary stream. No more unzipping
-- Work with XML inside ZIP without unpacking
-- Create SECURITY.md
-- Refactoring LustratedPersonsRegister.py and DebtorsRegister.py modules
-- Merge remote-tracking branch 'origin/9-refactoring-etl-pipeline' into 9-refactoring-etl-pipeline
-- Refactoring DebtorsRegister.py modules
-- Delete .idea directory
-- Experiments with CSV file reading
-- Merge pull request #16 from AMProduction/migrate-to-airflow
-- Added apache-airflow to requirements.txt
-- Migrated to Airflow
-- Passed the secret variables to the docker-compose.yml. Strart using Airflow
-- The docker-compose.yml was added to start Mongo and Airflow containers
-- The big refactoring began
-- Merge pull request #8 from AMProduction/Unit_tests
-- Tests enhancements. Added session scope for a fixture
-- Merge pull request #7 from AMProduction/Save_search_results
-- Search results save to PDF via html2pdf library
-- README.md changed
-- Merge pull request #5 from AMProduction/Sync_codebase
-- Lustrated persons tab added to Search result page
-- Sync_codebase
-- Update issue templates
-- Create CODE_OF_CONDUCT.md
-- Refactoring to implement PEP 8
-- readme is changed
-- UI improvements
-- Migration to flask
-- Initial commit
+- Read the DB connection string from the .env file
+- HTML structure changed
+- Refactored search results representation
+- Code beautification
+- Added [CSRF](https://wtforms.readthedocs.io/en/2.3.x/csrf/) app protection
+- Added [WTForms](https://wtforms.readthedocs.io/en/2.3.x/) support
+
+***
+
+## v2.1a
+
+### The main pull requests
+
+- https://github.com/AMProduction/SearchMyData-2.0/pull/26
+- https://github.com/AMProduction/SearchMyData-2.0/pull/27
+- https://github.com/AMProduction/SearchMyData-2.0/pull/28
+
+### The main changes
+
+- [Dockerfile](Dockerfile) added
+- The [docker-compose.yml](docker-compose.yml) modified
+- Added [GitHub actions](.github/workflows/docker-hub.yml) to build and push images
+  to [Docker hub](https://hub.docker.com/repository/docker/andruxa17/searchmydata2/general)
+- Return documents per page and page numbers
+- Added the paginations to the template
+- Added process page_number from the URL
+- Added processing NEXT and PREVIOUS buttons
+- Docstring updated. Added documents found count. SearchForm modified
+- Added saving the search query to the session variable
+
+***
+
+## v2.2b
+
+### The main pull requests
+
+- https://github.com/AMProduction/SearchMyData-2.0/pull/31
+
+### The main changes
+
+- Create [PULL_REQUEST_TEMPLATE.md](docs/PULL_REQUEST_TEMPLATE.md)
+- Create [CONTRIBUTING.md](docs/CONTRIBUTING.md)
+- Refactored the service collection processing
+- Added: debtors_model, lustrated_persons_model, missing_persons_model, wanted_persons_model
+- Added mapping for ObjectID field in the models. Added processing Missing Persons register
+  through [the ORM](http://mongoengine.org)
+- Added processing all registers through [the ORM](http://mongoengine.org)
+- Refactored /result route
+- Change import in routes.py
+- Code prettified
+- [readme.md](README.md) updated
+- [changelog.md](changelog.md) added
