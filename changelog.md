@@ -59,6 +59,7 @@
 ### The main pull requests
 
 - https://github.com/AMProduction/SearchMyData-2.0/pull/31
+- https://github.com/AMProduction/SearchMyData-2.0/pull/33
 
 ### The main changes
 
