@@ -36,4 +36,4 @@ RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /
 USER appuser
 
 EXPOSE 5001
-CMD [ "flask", "run", "--host", "0.0.0.0", "--port", "5001"]
+CMD [ "waitress-serve", "--host", "0.0.0.0", "--port", "5001", "main:app"]
