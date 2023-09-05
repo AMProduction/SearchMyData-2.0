@@ -76,11 +76,13 @@
 - [readme.md](README.md) updated
 - [changelog.md](changelog.md) added
 
+***
+
 ## v2.3
 
 ### The main pull requests
 
-- https://github.com/AMProduction/SearchMyData-2.0/pull/31
+- https://github.com/AMProduction/SearchMyData-2.0/pull/34
 
 ### The main changes
 
