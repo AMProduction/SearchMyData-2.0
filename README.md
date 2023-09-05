@@ -25,7 +25,7 @@ The ENV variables:
   interactive traceback in the browser when an unhandled error occurs during a request. This debugger should only be
   used during development.
 - **FLASK_APP**. The environment variable is the name of the module to import at flask run. Usually `main.py`.
-- *SECRET_KEY**. A secret key that will be used for securely signing the session cookie and can be used for any other
+- **SECRET_KEY**. A secret key that will be used for securely signing the session cookie and can be used for any other
   security related needs by extensions or your application. It should be a long random `bytes` or `str`.
 - **MONGO_URI**. The standard URI connection scheme.
 - **MONGO_INITDB_DATABASE**. The DB name.
