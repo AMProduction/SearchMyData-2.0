@@ -75,3 +75,16 @@
 - Code prettified
 - [readme.md](README.md) updated
 - [changelog.md](changelog.md) added
+
+## v2.3
+
+### The main pull requests
+
+- https://github.com/AMProduction/SearchMyData-2.0/pull/31
+
+### The main changes
+
+- Added the [Waitress](https://flask.palletsprojects.com/en/2.3.x/deploying/waitress/) as a prod WSGI server
+- [Dockerfile](Dockerfile) modified
+- [readme.md](README.md) updated
+- [changelog.md](changelog.md) updated
